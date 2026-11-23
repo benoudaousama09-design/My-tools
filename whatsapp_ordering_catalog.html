@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Storefront & Catalog</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#25D366',
+                            600: '#16a34a',
+                            700: '#128C7E',
+                            800: '#075E54',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Smooth Cart Drawer Transitions */
+        .drawer-closed { transform: translateX(100%); }
+        .drawer-open { transform: translateX(0); }
+        
+        /* Hide scrollbar for category pills on mobile */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-whatsapp-100 selection:text-whatsapp-800">
+
+    <!-- ==================== STICKY HEADER ==================== -->
+    <header class="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <!-- Brand Logo & Name -->
+            <div onclick="window.switchToClient()" class="flex items-center gap-2.5 cursor-pointer group">
+                <div class="w-10 h-10 rounded-xl bg-whatsapp-600 text-white flex items-center justify-center shadow-sm group-hover:bg-whatsapp-700 transition-colors">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 id="header-store-name" class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-none">Modern Boutique</h1>
+                    <span id="sync-status-pill" class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ready to Order
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Admin Mode Indicator & Exit -->
+                <div id="admin-header-controls" class="hidden flex items-center gap-2">
+                    <span class="hidden sm:inline-flex items-center gap-1.5 bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-whatsapp-500"></i> Admin Mode
+                    </span>
+                    <button onclick="window.switchToClient()" class="text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                        <i data-lucide="eye" class="w-4 h-4"></i> <span class="hidden sm:inline">View Store</span>
+                    </button>
+                    <button onclick="window.adminLogout()" class="text-xs sm:text-sm font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5" title="Logout">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Client Cart Button -->
+                <button id="header-cart-btn" onclick="window.toggleCart(true)" class="relative p-2.5 rounded-xl bg-slate-100 hover:bg-whatsapp-50 text-slate-700 hover:text-whatsapp-700 transition-all focus:outline-none focus:ring-2 focus:ring-whatsapp-500/40" aria-label="Open Cart">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-whatsapp-600 text-white text-[11px] font-bold rounded-full min-w-[20px] h-5 px-1 flex items-center justify-center shadow-sm ring-2 ring-white">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== CLIENT STOREFRONT VIEW ==================== -->
+    <div id="client-view" class="flex-grow flex flex-col">
+        <!-- Hero Banner -->
+        <section class="bg-gradient-to-br from-whatsapp-50 via-white to-slate-50 border-b border-slate-200/60 py-8 sm:py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-whatsapp-100/80 text-whatsapp-800 text-xs font-semibold mb-3">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> Fast & Direct WhatsApp Ordering
+                </span>
+                <h2 id="hero-title" class="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">Discover Our Curated Collection</h2>
+                <p id="hero-tagline" class="mt-2.5 text-sm sm:text-base text-slate-600 max-w-2xl mx-auto">Select your favorite items, customize your quantities, and send your order directly to us on WhatsApp in one tap.</p>
+            </div>
+        </section>
+
+        <!-- Search & Category Filter Bar -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2 w-full">
+            <div class="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+                <!-- Category Pills -->
+                <div id="category-filters" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Search Box -->
+                <div class="relative w-full md:w-72 flex-shrink-0">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input type="text" id="client-search-input" oninput="window.handleSearch(this.value)" placeholder="Search products..." class="w-full pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 transition-all shadow-sm">
+                    <button id="clear-search-btn" onclick="window.clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Grid -->
+        <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
+                <!-- Products injected via JS -->
+            </div>
+        </main>
+
+        <!-- Floating WhatsApp Quick Chat Button -->
+        <button onclick="window.openQuickChat()" class="fixed bottom-5 right-5 z-30 bg-whatsapp-500 hover:bg-whatsapp-600 text-white p-3.5 sm:px-4 sm:py-3 rounded-full shadow-lg hover:shadow-xl transition-all flex items-center gap-2 group" aria-label="Chat on WhatsApp">
+            <i data-lucide="message-circle" class="w-6 h-6 fill-current"></i>
+            <span class="hidden sm:inline text-sm font-semibold pr-1">Ask a Question</span>
+        </button>
+    </div>
+
+    <!-- ==================== ADMIN DASHBOARD VIEW ==================== -->
+    <div id="admin-view" class="hidden flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <!-- Admin Top Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900">Store Control Panel</h2>
+                <p class="text-sm text-slate-500">Manage your product catalog, stock availability, and WhatsApp settings.</p>
+            </div>
+            <button onclick="window.openProductModal()" class="bg-whatsapp-600 hover:bg-whatsapp-700 text-white px-4 py-2.5 rounded-xl font-semibold text-sm shadow-sm transition-all flex items-center justify-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> Add New Product
+            </button>
+        </div>
+
+        <!-- Admin Navigation Tabs -->
+        <div class="flex border-b border-slate-200 mb-6 gap-6 overflow-x-auto no-scrollbar">
+            <button onclick="window.switchAdminTab('products')" id="tab-btn-products" class="pb-3 text-sm font-semibold border-b-2 border-whatsapp-600 text-whatsapp-700 whitespace-nowrap flex items-center gap-2">
+                <i data-lucide="package" class="w-4 h-4"></i> Products (<span id="admin-product-count">0</span>)
+            </button>
+            <button onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-2">
+                <i data-lucide="settings" class="w-4 h-4"></i> Store & WhatsApp Settings
+            </button>
+            <button onclick="window.switchAdminTab('cloud')" id="tab-btn-cloud" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-2">
+                <i data-lucide="cloud" class="w-4 h-4"></i> Cloud Sync (Firebase)
+            </button>
+        </div>
+
+        <!-- TAB 1: INVENTORY MANAGEMENT -->
+        <div id="admin-tab-products" class="space-y-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Product</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Price</th>
+                                <th class="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th class="px-5 py-3.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-tbody" class="bg-white divide-y divide-slate-100">
+                            <!-- Admin rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: STORE & WHATSAPP SETTINGS -->
+        <div id="admin-tab-settings" class="hidden max-w-2xl">
+            <form onsubmit="window.saveStoreSettings(event)" class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 space-y-6">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">General & WhatsApp Configuration</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Changes update your storefront immediately.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Store Name</label>
+                        <input type="text" id="set-store-name" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Currency Symbol</label>
+                        <select id="set-currency" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none bg-white">
+                            <option value="MAD ">MAD (Moroccan Dirham)</option>
+                            <option value="$">$ (USD / Dollar)</option>
+                            <option value="€">€ (EUR / Euro)</option>
+                            <option value="£">£ (GBP / Pound)</option>
+                            <option value="AED ">AED (UAE Dirham)</option>
+                            <option value="SAR ">SAR (Saudi Riyal)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Hero Tagline</label>
+                    <input type="text" id="set-tagline" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                </div>
+
+                <div class="p-4 bg-whatsapp-50/70 border border-whatsapp-200 rounded-xl space-y-3">
+                    <label class="block text-sm font-semibold text-whatsapp-900">WhatsApp Business Phone Number</label>
+                    <p class="text-xs text-whatsapp-800">Enter your full number with country code, digits only (no <code>+</code>, spaces, or dashes). Example: <code>212600000000</code> for Morocco or <code>15551234567</code> for US.</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="tel" id="set-wa-number" required pattern="[0-9]{7,15}" placeholder="212600000000" class="flex-grow px-3.5 py-2.5 bg-white border border-whatsapp-300 rounded-xl text-sm font-mono focus:ring-2 focus:ring-whatsapp-500 outline-none">
+                        <button type="button" onclick="window.testWhatsAppNumber()" class="px-4 py-2.5 bg-white hover:bg-whatsapp-100 text-whatsapp-800 border border-whatsapp-300 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5">
+                            <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Test Number
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100">
+                    <label class="block text-sm font-medium text-slate-700 mb-1.5">Admin Dashboard Password</label>
+                    <input type="text" id="set-admin-password" required minlength="4" class="w-full sm:w-64 px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                    <p class="text-xs text-slate-400 mt-1">Used to unlock this Admin Dashboard when in local mode.</p>
+                </div>
+
+                <div class="pt-2 flex items-center justify-between">
+                    <button type="button" onclick="window.resetDemoData()" class="text-xs text-slate-500 hover:text-red-600 underline">Restore Default Sample Products</button>
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors shadow-sm">
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- TAB 3: OPTIONAL FIREBASE CLOUD SYNC -->
+        <div id="admin-tab-cloud" class="hidden max-w-2xl">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200/80 space-y-5">
+                <div class="flex items-start gap-3">
+                    <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                        <i data-lucide="database" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Multi-Device Cloud Sync (Optional)</h3>
+                        <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                            Right now, your store works automatically using browser storage. If you want changes made on your phone to appear on your clients' phones across the internet, paste your free Firebase Web App config JSON below.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="firebase-status-banner" class="p-3 rounded-xl bg-slate-100 text-slate-700 text-xs font-medium flex items-center gap-2">
+                    <i data-lucide="info" class="w-4 h-4 text-slate-500"></i>
+                    <span>Currently running in Standalone Local Mode.</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Firebase Config JSON</label>
+                    <textarea id="set-firebase-json" rows="6" placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", "storageBucket": "...", "messagingSenderId": "...", "appId": "..."}' class="w-full p-3.5 border border-slate-300 rounded-xl text-xs font-mono focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none"></textarea>
+                </div>
+
+                <div class="flex flex-wrap gap-3 justify-end">
+                    <button type="button" onclick="window.clearFirebaseConfig()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Disconnect Cloud</button>
+                    <button type="button" onclick="window.saveFirebaseConfig()" class="px-5 py-2.5 bg-whatsapp-600 hover:bg-whatsapp-700 text-white text-xs font-semibold rounded-xl shadow-sm transition-colors">Connect & Sync Cloud</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+            <p>&copy; <span id="footer-year"></span> <span id="footer-store-name">Modern Boutique</span>. All rights reserved.</p>
+            <button onclick="window.openLoginModal()" class="inline-flex items-center gap-1.5 text-slate-400 hover:text-slate-800 transition-colors py-1 px-2 rounded-lg hover:bg-slate-100">
+                <i data-lucide="lock" class="w-3.5 h-3.5"></i> <span id="footer-admin-label">Admin Login</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- ==================== SLIDE-OUT SHOPPING CART & CHECKOUT ==================== -->
+    <div id="cart-backdrop" onclick="window.toggleCart(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden opacity-0 transition-opacity duration-300"></div>
+    <aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full sm:w-[430px] bg-white z-50 shadow-2xl drawer-closed transition-transform duration-300 ease-out flex flex-col">
+        <!-- Drawer Header -->
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="shopping-bag" class="w-5 h-5 text-whatsapp-600"></i>
+                <h2 class="text-base font-bold text-slate-900">Your Order Cart</h2>
+            </div>
+            <button onclick="window.toggleCart(false)" class="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items + Customer Delivery Form -->
+        <div class="flex-grow overflow-y-auto p-5 space-y-6">
+            <!-- Items List -->
+            <div id="cart-items-list" class="space-y-3">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="cart-empty-state" class="py-12 text-center space-y-3">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                    <i data-lucide="shopping-cart" class="w-7 h-7"></i>
+                </div>
+                <p class="text-sm font-medium text-slate-600">Your cart is currently empty</p>
+                <p class="text-xs text-slate-400 max-w-xs mx-auto">Browse our products and tap "Add to Cart" to build your WhatsApp order.</p>
+            </div>
+
+            <!-- Customer Details Form (Shown when cart has items) -->
+            <div id="checkout-customer-form" class="hidden pt-4 border-t border-slate-100 space-y-3.5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Delivery & Contact Info</h3>
+                <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Your Name *</label>
+                    <input type="text" id="cust-name" placeholder="Enter your full name" class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Delivery Address / City *</label>
+                    <input type="text" id="cust-address" placeholder="Street address, neighborhood, city..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Order Notes (Optional)</label>
+                    <textarea id="cust-notes" rows="2" placeholder="Preferred delivery time, size/color notes..." class="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="border-t border-slate-200 p-5 bg-slate-50 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-slate-600">Estimated Total</span>
+                <span id="cart-subtotal" class="text-xl font-extrabold text-slate-900">0.00</span>
+            </div>
+            <button id="whatsapp-order-btn" onclick="window.sendOrderViaWhatsApp()" disabled class="w-full py-3.5 px-4 bg-whatsapp-600 hover:bg-whatsapp-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                <i data-lucide="message-circle" class="w-5 h-5 fill-current"></i>
+                <span>Order via WhatsApp</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==================== PRODUCT DETAILS MODAL (CLIENT) ==================== -->
+    <div id="details-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="relative aspect-video sm:aspect-[16/10] bg-slate-100">
+                <img id="detail-img" src="" alt="" class="w-full h-full object-cover">
+                <button onclick="window.closeDetailsModal()" class="absolute top-3 right-3 w-9 h-9 bg-white/90 hover:bg-white text-slate-800 rounded-full flex items-center justify-center shadow-md transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <span id="detail-category" class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white text-xs font-semibold px-3 py-1 rounded-lg">Category</span>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="flex justify-between items-start gap-4">
+                    <h3 id="detail-title" class="text-xl font-bold text-slate-900">Product Name</h3>
+                    <span id="detail-price" class="text-xl font-extrabold text-whatsapp-600 whitespace-nowrap">$0.00</span>
+                </div>
+                <p id="detail-desc" class="text-sm text-slate-600 leading-relaxed max-h-40 overflow-y-auto"></p>
+                <div class="pt-2 flex items-center gap-3">
+                    <button id="detail-add-btn" class="flex-grow py-3 px-5 bg-slate-900 hover:bg-whatsapp-600 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD / EDIT PRODUCT MODAL (ADMIN) ==================== -->
+    <div id="product-form-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 id="prod-modal-title" class="text-lg font-bold text-slate-900">Add New Product</h3>
+                <button onclick="window.closeProductModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form onsubmit="window.handleProductSubmit(event)" class="p-6 space-y-4 overflow-y-auto">
+                <input type="hidden" id="edit-prod-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Product Name *</label>
+                        <input type="text" id="edit-prod-name" required placeholder="e.g., Leather Crossbody Bag" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Price *</label>
+                        <input type="number" id="edit-prod-price" step="0.01" min="0" required placeholder="0.00" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Category *</label>
+                        <input type="text" id="edit-prod-category" list="category-suggestions" required placeholder="e.g., Accessories" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                        <datalist id="category-suggestions">
+                            <option value="Clothing">
+                            <option value="Accessories">
+                            <option value="Electronics">
+                            <option value="Home & Decor">
+                            <option value="Beauty">
+                        </datalist>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Availability</label>
+                        <select id="edit-prod-stock" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                            <option value="true">In Stock</option>
+                            <option value="false">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Image URL or Local Upload -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-slate-700">Product Image (Paste URL or Upload Photo)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="edit-prod-image" oninput="window.updateImagePreview(this.value)" placeholder="https://example.com/photo.jpg" class="flex-grow px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none">
+                        <label class="cursor-pointer px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-colors">
+                            <i data-lucide="upload" class="w-4 h-4"></i> Upload
+                            <input type="file" accept="image/*" onchange="window.handleImageFileUpload(event)" class="hidden">
+                        </label>
+                    </div>
+                    <!-- Live Preview -->
+                    <div class="mt-2 flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80">
+                        <img id="edit-img-preview" src="https://placehold.co/200x200/e2e8f0/64748b?text=Preview" alt="Preview" class="w-14 h-14 rounded-lg object-cover bg-white border border-slate-200">
+                        <div class="text-xs text-slate-500">
+                            <p class="font-medium text-slate-700">Live Image Preview</p>
+                            <p>Uploaded photos are automatically optimized for fast loading.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Description *</label>
+                    <textarea id="edit-prod-desc" rows="3" required placeholder="Describe features, sizes, materials, or details..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-whatsapp-500/30 focus:border-whatsapp-500 outline-none"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="window.closeProductModal()" class="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-whatsapp-600 hover:bg-whatsapp-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-colors">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== ADMIN LOGIN MODAL ==================== -->
+    <div id="login-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-2">
+                    <i data-lucide="shield" class="w-6 h-6 text-whatsapp-500"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Store Owner Login</h3>
+                <p class="text-xs text-slate-500">Enter your admin password to manage products & settings.</p>
+            </div>
+
+            <form onsubmit="window.handleAdminLogin(event)" class="space-y-3">
+                <div id="firebase-email-wrapper" class="hidden">
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Admin Email</label>
+                    <input type="email" id="login-email" placeholder="admin@yourstore.com" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:border-whatsapp-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm outline-none focus:border-whatsapp-500">
+                    <p id="default-pass-hint" class="text-[11px] text-slate-400 mt-1.5">Default password: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-semibold">admin123</code> (changeable in Settings)</p>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="window.closeLoginModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-semibold transition-colors">Unlock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== CUSTOM CONFIRMATION MODAL ==================== -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center space-y-4">
+            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 id="confirm-title" class="text-base font-bold text-slate-900">Are you sure?</h3>
+                <p id="confirm-desc" class="text-xs text-slate-500 mt-1">This action cannot be undone.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="window.closeConfirmModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">Cancel</button>
+                <button id="confirm-yes-btn" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIFICATION ==================== -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full shadow-xl text-xs font-medium flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none z-[70]">
+        <i id="toast-icon" data-lucide="check-circle-2" class="w-4 h-4 text-whatsapp-500"></i>
+        <span id="toast-text">Action completed</span>
+    </div>
+
+    <!-- ==================== APPLICATION LOGIC ==================== -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, collection, doc, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, getDocs } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // ------------------------------------------------------------
+        // 1. DEFAULT SAMPLE DATA (Guarantees Out-of-the-Box Experience)
+        // ------------------------------------------------------------
+        const DEFAULT_SETTINGS = {
+            storeName: "Modern Boutique",
+            tagline: "Select your favorite items, customize your quantities, and send your order directly to us on WhatsApp in one tap.",
+            currency: "MAD ",
+            whatsappNumber: "212600000000",
+            adminPassword: "admin123"
+        };
+
+        const SAMPLE_PRODUCTS = [
+            {
+                id: "sample-1",
+                name: "Artisan Leather Crossbody Bag",
+                price: 349.00,
+                category: "Accessories",
+                inStock: true,
+                image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80",
+                description: "Handcrafted genuine leather bag with adjustable strap, brass hardware, and spacious interior compartments for everyday essentials."
+            },
+            {
+                id: "sample-2",
+                name: "Minimalist Chronos Watch",
+                price: 590.00,
+                category: "Accessories",
+                inStock: true,
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+                description: "Ultra-thin matte stainless steel case with scratch-resistant sapphire glass and Japanese quartz movement. Water resistant up to 50m."
+            },
+            {
+                id: "sample-3",
+                name: "Organic Linen Overshirt",
+                price: 280.00,
+                category: "Clothing",
+                inStock: true,
+                image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=800&q=80",
+                description: "Breathable 100% pure organic linen tailored for a relaxed modern fit. Ideal for layering across warm days and cool evenings."
+            },
+            {
+                id: "sample-4",
+                name: "Wireless Studio Headphones",
+                price: 750.00,
+                category: "Electronics",
+                inStock: true,
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+                description: "Active noise-canceling over-ear headphones with 40-hour battery life, plush memory foam earcups, and crystal-clear call quality."
+            },
+            {
+                id: "sample-5",
+                name: "Ceramic Pour-Over Coffee Set",
+                price: 195.00,
+                category: "Home & Decor",
+                inStock: true,
+                image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
+                description: "Matte stoneware dripper and server crafted for precision brewing. Brings café-quality coffee extraction to your morning ritual."
+            },
+            {
+                id: "sample-6",
+                name: "Botanical Hydrating Serum",
+                price: 160.00,
+                category: "Beauty",
+                inStock: false,
+                image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80",
+                description: "Lightweight cold-pressed argan and hyaluronic acid formula designed to restore radiance and deeply nourish all skin types."
+            }
+        ];
+
+        // ------------------------------------------------------------
+        // 2. APPLICATION STATE
+        // ------------------------------------------------------------
+        const STORAGE_KEYS = {
+            PRODUCTS: "wa_store_products_v2",
+            SETTINGS: "wa_store_settings_v2",
+            CART: "wa_store_cart_v2",
+            CUSTOMER: "wa_store_customer_v2",
+            FB_CONFIG: "wa_store_fb_config_v2"
+        };
+
+        let state = {
+            products: [],
+            settings: { ...DEFAULT_SETTINGS },
+            cart: [],
+            activeCategory: "All",
+            searchQuery: "",
+            isAdmin: false,
+            useFirebase: false,
+            db: null,
+            auth: null,
+            appId: typeof __app_id !== 'undefined' ? __app_id : 'whatsapp-store-default'
+        };
+
+        // ------------------------------------------------------------
+        // 3. INITIALIZATION (Seamless Local + Optional Firebase)
+        // ------------------------------------------------------------
+        async function initApp() {
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+            
+            // Load Local Data First (Instant Render, Zero Delay)
+            loadLocalData();
+            renderAll();
+
+            // Check if Firebase config is injected by environment OR saved by admin
+            let fbConfig = null;
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try { fbConfig = JSON.parse(__firebase_config); } catch (e) {}
+            } else {
+                const savedFb = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
+                if (savedFb) {
+                    try { fbConfig = JSON.parse(savedFb); } catch (e) {}
+                }
+            }
+
+            if (fbConfig && fbConfig.apiKey && fbConfig.projectId) {
+                await connectFirebase(fbConfig);
+            }
+        }
+
+        function loadLocalData() {
+            try {
+                const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+                if (savedSettings) {
+                    state.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) };
+                } else {
+                    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(state.settings));
+                }
+
+                const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+                if (savedProducts) {
+                    state.products = JSON.parse(savedProducts);
+                } else {
+                    state.products = [...SAMPLE_PRODUCTS];
+                    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(state.products));
+                }
+
+                const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
+                if (savedCart) state.cart = JSON.parse(savedCart);
+
+                const savedCustomer = localStorage.getItem(STORAGE_KEYS.CUSTOMER);
+                if (savedCustomer) {
+                    const cust = JSON.parse(savedCustomer);
+                    document.getElementById('cust-name').value = cust.name || '';
+                    document.getElementById('cust-address').value = cust.address || '';
+                    document.getElementById('cust-notes').value = cust.notes || '';
+                }
+            } catch (err) {
+                console.warn("Local storage fallback:", err);
+                state.products = [...SAMPLE_PRODUCTS];
+            }
+        }
+
+        async function connectFirebase(fbConfig) {
+            try {
+                const app = initializeApp(fbConfig);
+                state.auth = getAuth(app);
+                state.db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(state.auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(state.auth);
+                }
+
+                state.useFirebase = true;
+                updateSyncIndicator(true);
+
+                // Listen to public products collection
+                const productsCol = collection(state.db, 'artifacts', state.appId, 'public', 'data', 'products');
+                onSnapshot(productsCol, async (snapshot) => {
+                    if (snapshot.empty) {
+                        // Seed sample products if cloud database is brand new
+                        for (const item of SAMPLE_PRODUCTS) {
+                            const { id, ...data } = item;
+                            await setDoc(doc(productsCol, id), data);
+                        }
+                    } else {
+                        state.products = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                        renderAll();
+                    }
+                }, (err) => {
+                    console.warn("Firestore read fallback to local:", err);
+                });
+
+                // Listen to store settings
+                const settingsDoc = doc(state.db, 'artifacts', state.appId, 'public', 'data', 'settings', 'general');
+                onSnapshot(settingsDoc, async (docSnap) => {
+                    if (docSnap.exists()) {
+                        state.settings = { ...state.settings, ...docSnap.data() };
+                        renderAll();
+                    } else {
+                        await setDoc(settingsDoc, state.settings);
+                    }
+                }, (err) => console.warn("Settings sync note:", err));
+
+            } catch (error) {
+                console.warn("Firebase connection skipped, running in local mode:", error);
+                state.useFirebase = false;
+                updateSyncIndicator(false);
+            }
+        }
+
+        function updateSyncIndicator(isCloud) {
+            const pill = document.getElementById('sync-status-pill');
+            const banner = document.getElementById('firebase-status-banner');
+            if (isCloud) {
+                pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-whatsapp-500"></span> Live Cloud Store`;
+                if (banner) {
+                    banner.className = "p-3 rounded-xl bg-whatsapp-50 text-whatsapp-800 border border-whatsapp-200 text-xs font-medium flex items-center gap-2";
+                    banner.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-whatsapp-600"></i> <span>Connected to Firebase Cloud Sync!</span>`;
+                }
+            } else {
+                pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Ready to Order`;
+                if (banner) {
+                    banner.className = "p-3 rounded-xl bg-slate-100 text-slate-700 text-xs font-medium flex items-center gap-2";
+                    banner.innerHTML = `<i data-lucide="info" class="w-4 h-4 text-slate-500"></i> <span>Currently running in Standalone Local Mode.</span>`;
+                }
+            }
+            lucide.createIcons();
+        }
+
+        // ------------------------------------------------------------
+        // 4. RENDERING FUNCTIONS
+        // ------------------------------------------------------------
+        function renderAll() {
+            applyStoreBranding();
+            renderCategoryPills();
+            renderClientProducts();
+            renderCart();
+            if (state.isAdmin) {
+                renderAdminTable();
+                populateSettingsForm();
+            }
+            lucide.createIcons();
+        }
+
+        function applyStoreBranding() {
+            const { storeName, tagline } = state.settings;
+            document.title = `${storeName} — Order via WhatsApp`;
+            document.getElementById('header-store-name').textContent = storeName;
+            document.getElementById('footer-store-name').textContent = storeName;
+            document.getElementById('hero-tagline').textContent = tagline;
+        }
+
+        function formatPrice(amount) {
+            const num = parseFloat(amount) || 0;
+            return `${state.settings.currency}${num.toFixed(2)}`;
+        }
+
+        function renderCategoryPills() {
+            const container = document.getElementById('category-filters');
+            const categories = ["All", ...new Set(state.products.map(p => p.category).filter(Boolean))];
+            
+            if (!categories.includes(state.activeCategory)) {
+                state.activeCategory = "All";
+            }
+
+            container.innerHTML = categories.map(cat => {
+                const isActive = cat === state.activeCategory;
+                const classes = isActive
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80";
+                return `<button onclick="window.setCategory('${cat.replace(/'/g, "\\'")}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${classes}">${cat}</button>`;
+            }).join('');
+        }
+
+        function renderClientProducts() {
+            const grid = document.getElementById('product-grid');
+            const query = state.searchQuery.toLowerCase().trim();
+
+            const filtered = state.products.filter(p => {
+                const matchesCat = state.activeCategory === "All" || p.category === state.activeCategory;
+                const matchesSearch = !query || 
+                    p.name.toLowerCase().includes(query) || 
+                    (p.description && p.description.toLowerCase().includes(query)) ||
+                    (p.category && p.category.toLowerCase().includes(query));
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-16 text-center space-y-3 bg-white rounded-2xl border border-slate-200/60">
+                        <div class="w-14 h-14 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                            <i data-lucide="search-x" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800">No products found</h3>
+                        <p class="text-xs text-slate-500">Try clearing your search or selecting a different category.</p>
+                        <button onclick="window.resetFilters()" class="mt-2 px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl">Show All Products</button>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            grid.innerHTML = filtered.map(product => {
+                const isAvailable = product.inStock !== false;
+                const imgSrc = product.image || 'https://placehold.co/600x600/e2e8f0/475569?text=Product';
+                
+                return `
+                    <article class="bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden group">
+                        <!-- Image Container -->
+                        <div onclick="window.openDetailsModal('${product.id}')" class="relative aspect-square bg-slate-100 overflow-hidden cursor-pointer">
+                            <img src="${imgSrc}" alt="${product.name}" loading="lazy" onerror="this.src='https://placehold.co/600x600/e2e8f0/475569?text=No+Image'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${!isAvailable ? 'opacity-60 grayscale' : ''}">
+                            
+                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-xs text-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg shadow-xs">
+                                ${product.category || 'General'}
+                            </span>
+
+                            ${!isAvailable ? `
+                                <div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center">
+                                    <span class="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider shadow-md">Out of Stock</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="p-4 sm:p-5 flex flex-col flex-grow">
+                            <div onclick="window.openDetailsModal('${product.id}')" class="cursor-pointer mb-1.5">
+                                <h3 class="font-bold text-slate-900 text-base leading-snug group-hover:text-whatsapp-700 transition-colors line-clamp-1">${product.name}</h3>
+                            </div>
+                            <p class="text-xs text-slate-500 line-clamp-2 mb-4 flex-grow leading-relaxed">${product.description || ''}</p>
+                            
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                <span class="text-lg font-extrabold text-slate-900">${formatPrice(product.price)}</span>
+                                
+                                ${isAvailable ? `
+                                    <button onclick="window.addToCart('${product.id}')" class="px-3.5 py-2 bg-slate-900 hover:bg-whatsapp-600 active:scale-95 text-white text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-xs">
+                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add
+                                    </button>
+                                ` : `
+                                    <button disabled class="px-3.5 py-2 bg-slate-100 text-slate-400 text-xs font-semibold rounded-xl cursor-not-allowed">
+                                        Unavailable
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // ------------------------------------------------------------
+        // 5. CLIENT INTERACTIONS & CART
+        // ------------------------------------------------------------
+        window.setCategory = (cat) => {
+            state.activeCategory = cat;
+            renderCategoryPills();
+            renderClientProducts();
+        };
+
+        window.handleSearch = (val) => {
+            state.searchQuery = val;
+            document.getElementById('clear-search-btn').classList.toggle('hidden', !val);
+            renderClientProducts();
+        };
+
+        window.clearSearch = () => {
+            document.getElementById('client-search-input').value = '';
+            window.handleSearch('');
+        };
+
+        window.resetFilters = () => {
+            state.activeCategory = "All";
+            window.clearSearch();
+            renderCategoryPills();
+        };
+
+        window.openDetailsModal = (id) => {
+            const product = state.products.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('detail-img').src = product.image || 'https://placehold.co/600x400/e2e8f0/475569?text=Product';
+            document.getElementById('detail-category').textContent = product.category || 'General';
+            document.getElementById('detail-title').textContent = product.name;
+            document.getElementById('detail-price').textContent = formatPrice(product.price);
+            document.getElementById('detail-desc').textContent = product.description || 'No description provided.';
+
+            const addBtn = document.getElementById('detail-add-btn');
+            if (product.inStock === false) {
+                addBtn.disabled = true;
+                addBtn.className = "flex-grow py-3 px-5 bg-slate-200 text-slate-400 font-semibold rounded-xl cursor-not-allowed flex items-center justify-center gap-2";
+                addBtn.innerHTML = `<span>Currently Out of Stock</span>`;
+            } else {
+                addBtn.disabled = false;
+                addBtn.className = "flex-grow py-3 px-5 bg-whatsapp-600 hover:bg-whatsapp-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm";
+                addBtn.innerHTML = `<i data-lucide="shopping-cart" class="w-4 h-4"></i> <span>Add to Cart</span>`;
+                addBtn.onclick = () => {
+                    window.addToCart(product.id);
+                    window.closeDetailsModal();
+                };
+            }
+
+            document.getElementById('details-modal').classList.remove('hidden');
+            lucide.createIcons();
+        };
+
+        window.closeDetailsModal = () => {
+            document.getElementById('details-modal').classList.add('hidden');
+        };
+
+        window.addToCart = (productId) => {
+            const product = state.products.find(p => p.id === productId);
+            if (!product || product.inStock === false) return;
+
+            const existing = state.cart.find(item => item.id === productId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                state.cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: parseFloat(product.price),
+                    image: product.image,
+                    quantity: 1
+                });
+            }
+
+            saveCart();
+            renderCart();
+            showToast(`Added "${product.name}" to cart`);
+        };
+
+        window.updateCartQty = (productId, delta) => {
+            const idx = state.cart.findIndex(item => item.id === productId);
+            if (idx === -1) return;
+
+            state.cart[idx].quantity += delta;
+            if (state.cart[idx].quantity <= 0) {
+                state.cart.splice(idx, 1);
+            }
+            saveCart();
+            renderCart();
+        };
+
+        window.removeCartItem = (productId) => {
+            state.cart = state.cart.filter(item => item.id !== productId);
+            saveCart();
+            renderCart();
+        };
+
+        function saveCart() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(state.cart));
+            } catch (e) {}
+        }
+
+        function renderCart() {
+            const listEl = document.getElementById('cart-items-list');
+            const emptyEl = document.getElementById('cart-empty-state');
+            const formEl = document.getElementById('checkout-customer-form');
+            const orderBtn = document.getElementById('whatsapp-order-btn');
+            const badge = document.getElementById('cart-badge');
+
+            let totalQty = 0;
+            let subtotal = 0;
+
+            state.cart.forEach(item => {
+                totalQty += item.quantity;
+                subtotal += item.price * item.quantity;
+            });
+
+            if (totalQty > 0) {
+                badge.textContent = totalQty > 99 ? '99+' : totalQty;
+                badge.classList.remove('hidden');
+                emptyEl.classList.add('hidden');
+                formEl.classList.remove('hidden');
+                orderBtn.disabled = false;
+            } else {
+                badge.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                formEl.classList.add('hidden');
+                orderBtn.disabled = true;
+            }
+
+            document.getElementById('cart-subtotal').textContent = formatPrice(subtotal);
+
+            listEl.innerHTML = state.cart.map(item => `
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200/70">
+                    <img src="${item.image || 'https://placehold.co/100x100?text=Item'}" alt="" onerror="this.src='https://placehold.co/100x100?text=Item'" class="w-14 h-14 rounded-lg object-cover bg-white border border-slate-200">
+                    <div class="flex-grow min-w-0">
+                        <h4 class="text-xs font-bold text-slate-900 truncate">${item.name}</h4>
+                        <p class="text-xs font-semibold text-whatsapp-700 mt-0.5">${formatPrice(item.price * item.quantity)}</p>
+                        <div class="flex items-center gap-2 mt-2">
+                            <button onclick="window.updateCartQty('${item.id}', -1)" class="w-6 h-6 rounded-md bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700">
+                                <i data-lucide="minus" class="w-3 h-3"></i>
+                            </button>
+                            <span class="text-xs font-bold w-5 text-center">${item.quantity}</span>
+                            <button onclick="window.updateCartQty('${item.id}', 1)" class="w-6 h-6 rounded-md bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700">
+                                <i data-lucide="plus" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="window.removeCartItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-red-500 transition-colors" title="Remove">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        window.toggleCart = (open) => {
+            const backdrop = document.getElementById('cart-backdrop');
+            const drawer = document.getElementById('cart-drawer');
+
+            if (open) {
+                backdrop.classList.remove('hidden');
+                setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+                drawer.classList.remove('drawer-closed');
+                drawer.classList.add('drawer-open');
+                document.body.style.overflow = 'hidden';
+            } else {
+                backdrop.classList.add('opacity-0');
+                drawer.classList.remove('drawer-open');
+                drawer.classList.add('drawer-closed');
+                setTimeout(() => backdrop.classList.add('hidden'), 300);
+                document.body.style.overflow = '';
+            }
+        };
+
+        // ------------------------------------------------------------
+        // 6. SEAMLESS WHATSAPP CHECKOUT & QUICK CHAT
+        // ------------------------------------------------------------
+        window.sendOrderViaWhatsApp = () => {
+            if (state.cart.length === 0) return;
+
+            const name = document.getElementById('cust-name').value.trim();
+            const address = document.getElementById('cust-address').value.trim();
+            const notes = document.getElementById('cust-notes').value.trim();
+
+            if (!name) {
+                showToast("Please enter your name before ordering", true);
+                document.getElementById('cust-name').focus();
+                return;
+            }
+            if (!address) {
+                showToast("Please enter your delivery address", true);
+                document.getElementById('cust-address').focus();
+                return;
+            }
+
+            // Save customer info for convenience on next order
+            try {
+                localStorage.setItem(STORAGE_KEYS.CUSTOMER, JSON.stringify({ name, address, notes }));
+            } catch (e) {}
+
+            const cleanPhone = (state.settings.whatsappNumber || "").replace(/\D/g, '');
+            if (!cleanPhone) {
+                showToast("Store WhatsApp number is not configured yet.", true);
+                return;
+            }
+
+            let subtotal = 0;
+            let lines = [];
+            lines.push(`🛍️ *NEW ORDER — ${state.settings.storeName.toUpperCase()}*`);
+            lines.push(`────────────────────`);
+            
+            state.cart.forEach((item, index) => {
+                const lineTotal = item.price * item.quantity;
+                subtotal += lineTotal;
+                lines.push(`${index + 1}. *${item.name}*`);
+                lines.push(`   Qty: ${item.quantity} × ${formatPrice(item.price)} = *${formatPrice(lineTotal)}*`);
+            });
+
+            lines.push(`────────────────────`);
+            lines.push(`💰 *TOTAL: ${formatPrice(subtotal)}*`);
+            lines.push(``);
+            lines.push(`👤 *Customer Details:*`);
+            lines.push(`• Name: ${name}`);
+            lines.push(`• Address: ${address}`);
+            if (notes) lines.push(`• Notes: ${notes}`);
+
+            const message = encodeURIComponent(lines.join('\n'));
+            const waUrl = `https://wa.me/${cleanPhone}?text=${message}`;
+            window.open(waUrl, '_blank', 'noopener,noreferrer');
+        };
+
+        window.openQuickChat = () => {
+            const cleanPhone = (state.settings.whatsappNumber || "").replace(/\D/g, '');
+            const text = encodeURIComponent(`Hello ${state.settings.storeName}! I have a question about your products.`);
+            window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank', 'noopener,noreferrer');
+        };
+
+        // ------------------------------------------------------------
+        // 7. ADMIN AUTHENTICATION & VIEW SWITCHING
+        // ------------------------------------------------------------
+        window.openLoginModal = () => {
+            if (state.isAdmin) {
+                window.switchToAdmin();
+                return;
+            }
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('login-password').focus(), 50);
+        };
+
+        window.closeLoginModal = () => {
+            document.getElementById('login-modal').classList.add('hidden');
+        };
+
+        window.handleAdminLogin = async (e) => {
+            e.preventDefault();
+            const passInput = document.getElementById('login-password').value;
+
+            if (passInput === state.settings.adminPassword) {
+                state.isAdmin = true;
+                window.closeLoginModal();
+                window.switchToAdmin();
+                showToast("Welcome back, Admin!");
+            } else {
+                showToast("Incorrect password. Try 'admin123'", true);
+            }
+        };
+
+        window.switchToAdmin = () => {
+            if (!state.isAdmin) return;
+            document.getElementById('client-view').classList.add('hidden');
+            document.getElementById('header-cart-btn').classList.add('hidden');
+            document.getElementById('admin-view').classList.remove('hidden');
+            document.getElementById('admin-header-controls').classList.remove('hidden');
+            document.getElementById('footer-admin-label').textContent = "Admin Dashboard Active";
+            
+            renderAdminTable();
+            populateSettingsForm();
+            lucide.createIcons();
+        };
+
+        window.switchToClient = () => {
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('client-view').classList.remove('hidden');
+            document.getElementById('header-cart-btn').classList.remove('hidden');
+            if (!state.isAdmin) {
+                document.getElementById('admin-header-controls').classList.add('hidden');
+            }
+            renderAll();
+        };
+
+        window.adminLogout = () => {
+            state.isAdmin = false;
+            document.getElementById('admin-header-controls').classList.add('hidden');
+            document.getElementById('footer-admin-label').textContent = "Admin Login";
+            window.switchToClient();
+            showToast("Logged out of Admin Mode");
+        };
+
+        window.switchAdminTab = (tabName) => {
+            ['products', 'settings', 'cloud'].forEach(t => {
+                const isSelected = t === tabName;
+                document.getElementById(`admin-tab-${t}`).classList.toggle('hidden', !isSelected);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.className = isSelected
+                    ? "pb-3 text-sm font-semibold border-b-2 border-whatsapp-600 text-whatsapp-700 whitespace-nowrap flex items-center gap-2"
+                    : "pb-3 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 whitespace-nowrap flex items-center gap-2";
+            });
+            lucide.createIcons();
+        };
+
+        // ------------------------------------------------------------
+        // 8. ADMIN INVENTORY CRUD + IMAGE COMPRESSION
+        // ------------------------------------------------------------
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-product-tbody');
+            document.getElementById('admin-product-count').textContent = state.products.length;
+
+            if (state.products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-sm text-slate-500">No products yet. Click "Add New Product" to start building your catalog.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = state.products.map(prod => {
+                const inStock = prod.inStock !== false;
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-5 py-3.5">
+                            <div class="flex items-center gap-3">
+                                <img src="${prod.image || 'https://placehold.co/100x100?text=NA'}" alt="" onerror="this.src='https://placehold.co/100x100?text=NA'" class="w-11 h-11 rounded-xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0">
+                                <div class="min-w-0 max-w-xs">
+                                    <p class="text-sm font-bold text-slate-900 truncate">${prod.name}</p>
+                                    <p class="text-xs text-slate-400 truncate">${prod.description || ''}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap">
+                            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-medium">${prod.category || 'General'}</span>
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap text-sm font-bold text-slate-900">
+                            ${formatPrice(prod.price)}
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap">
+                            <button onclick="window.toggleProductStock('${prod.id}')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${inStock ? 'bg-whatsapp-100 text-whatsapp-800 hover:bg-whatsapp-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}">
+                                <span class="w-1.5 h-1.5 rounded-full ${inStock ? 'bg-whatsapp-600' : 'bg-red-600'}"></span>
+                                ${inStock ? 'In Stock' : 'Out of Stock'}
+                            </button>
+                        </td>
+                        <td class="px-5 py-3.5 whitespace-nowrap text-right text-sm font-medium space-x-1">
+                            <button onclick="window.openProductModal('${prod.id}')" class="p-2 text-slate-600 hover:text-whatsapp-700 hover:bg-whatsapp-50 rounded-lg transition-colors" title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="window.confirmDeleteProduct('${prod.id}')" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        window.openProductModal = (id = null) => {
+            const modal = document.getElementById('product-form-modal');
+            const preview = document.getElementById('edit-img-preview');
+
+            if (id) {
+                const prod = state.products.find(p => p.id === id);
+                if (!prod) return;
+                document.getElementById('prod-modal-title').textContent = "Edit Product";
+                document.getElementById('edit-prod-id').value = prod.id;
+                document.getElementById('edit-prod-name').value = prod.name;
+                document.getElementById('edit-prod-price').value = prod.price;
+                document.getElementById('edit-prod-category').value = prod.category || '';
+                document.getElementById('edit-prod-stock').value = prod.inStock === false ? "false" : "true";
+                document.getElementById('edit-prod-image').value = prod.image || '';
+                document.getElementById('edit-prod-desc').value = prod.description || '';
+                preview.src = prod.image || 'https://placehold.co/200x200/e2e8f0/64748b?text=Preview';
+            } else {
+                document.getElementById('prod-modal-title').textContent = "Add New Product";
+                document.getElementById('edit-prod-id').value = '';
+                document.getElementById('edit-prod-name').value = '';
+                document.getElementById('edit-prod-price').value = '';
+                document.getElementById('edit-prod-category').value = '';
+                document.getElementById('edit-prod-stock').value = "true";
+                document.getElementById('edit-prod-image').value = '';
+                document.getElementById('edit-prod-desc').value = '';
+                preview.src = 'https://placehold.co/200x200/e2e8f0/64748b?text=Preview';
+            }
+
+            modal.classList.remove('hidden');
+        };
+
+        window.closeProductModal = () => {
+            document.getElementById('product-form-modal').classList.add('hidden');
+        };
+
+        window.updateImagePreview = (url) => {
+            const preview = document.getElementById('edit-img-preview');
+            preview.src = url.trim() || 'https://placehold.co/200x200/e2e8f0/64748b?text=Preview';
+        };
+
+        // Compress uploaded local image so it fits cleanly in localStorage or Firestore
+        window.handleImageFileUpload = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 700;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height && width > MAX_SIZE) {
+                        height *= MAX_SIZE / width;
+                        width = MAX_SIZE;
+                    } else if (height > MAX_SIZE) {
+                        width *= MAX_SIZE / height;
+                        height = MAX_SIZE;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+                    document.getElementById('edit-prod-image').value = compressedDataUrl;
+                    window.updateImagePreview(compressedDataUrl);
+                    showToast("Photo uploaded & optimized!");
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.handleProductSubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-prod-id').value;
+            const productData = {
+                name: document.getElementById('edit-prod-name').value.trim(),
+                price: parseFloat(document.getElementById('edit-prod-price').value),
+                category: document.getElementById('edit-prod-category').value.trim() || "General",
+                inStock: document.getElementById('edit-prod-stock').value === "true",
+                image: document.getElementById('edit-prod-image').value.trim() || "https://placehold.co/600x600/e2e8f0/475569?text=Product",
+                description: document.getElementById('edit-prod-desc').value.trim()
+            };
+
+            if (id) {
+                const idx = state.products.findIndex(p => p.id === id);
+                if (idx > -1) state.products[idx] = { id, ...productData };
+                if (state.useFirebase && state.db) {
+                    try {
+                        await updateDoc(doc(state.db, 'artifacts', state.appId, 'public', 'data', 'products', id), productData);
+                    } catch (err) { console.warn(err); }
+                }
+                showToast("Product updated!");
+            } else {
+                const newId = 'prod-' + Date.now();
+                state.products.unshift({ id: newId, ...productData });
+                if (state.useFirebase && state.db) {
+                    try {
+                        await setDoc(doc(state.db, 'artifacts', state.appId, 'public', 'data', 'products', newId), productData);
+                    } catch (err) { console.warn(err); }
+                }
+                showToast("New product added!");
+            }
+
+            persistProductsLocally();
+            window.closeProductModal();
+            renderAll();
+        };
+
+        window.toggleProductStock = async (id) => {
+            const prod = state.products.find(p => p.id === id);
+            if (!prod) return;
+            prod.inStock = prod.inStock === false ? true : false;
+
+            if (state.useFirebase && state.db) {
+                try {
+                    await updateDoc(doc(state.db, 'artifacts', state.appId, 'public', 'data', 'products', id), { inStock: prod.inStock });
+                } catch (err) { console.warn(err); }
+            }
+
+            persistProductsLocally();
+            renderAll();
+            showToast(`${prod.name} marked as ${prod.inStock ? 'In Stock' : 'Out of Stock'}`);
+        };
+
+        window.confirmDeleteProduct = (id) => {
+            const prod = state.products.find(p => p.id === id);
+            if (!prod) return;
+
+            document.getElementById('confirm-title').textContent = `Delete "${prod.name}"?`;
+            document.getElementById('confirm-desc').textContent = "This product will be permanently removed from your catalog.";
+            const yesBtn = document.getElementById('confirm-yes-btn');
+            yesBtn.onclick = async () => {
+                state.products = state.products.filter(p => p.id !== id);
+                state.cart = state.cart.filter(c => c.id !== id);
+                saveCart();
+                persistProductsLocally();
+
+                if (state.useFirebase && state.db) {
+                    try {
+                        await deleteDoc(doc(state.db, 'artifacts', state.appId, 'public', 'data', 'products', id));
+                    } catch (err) { console.warn(err); }
+                }
+
+                window.closeConfirmModal();
+                renderAll();
+                showToast("Product deleted");
+            };
+
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        };
+
+        window.closeConfirmModal = () => {
+            document.getElementById('confirm-modal').classList.add('hidden');
+        };
+
+        function persistProductsLocally() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(state.products));
+            } catch (e) {
+                showToast("Storage full — consider using image URLs instead of large uploads.", true);
+            }
+        }
+
+        // ------------------------------------------------------------
+        // 9. STORE SETTINGS & CLOUD CONFIG
+        // ------------------------------------------------------------
+        function populateSettingsForm() {
+            document.getElementById('set-store-name').value = state.settings.storeName;
+            document.getElementById('set-currency').value = state.settings.currency;
+            document.getElementById('set-tagline').value = state.settings.tagline;
+            document.getElementById('set-wa-number').value = state.settings.whatsappNumber;
+            document.getElementById('set-admin-password').value = state.settings.adminPassword;
+
+            const savedFb = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
+            if (savedFb) document.getElementById('set-firebase-json').value = savedFb;
+        }
+
+        window.saveStoreSettings = async (e) => {
+            e.preventDefault();
+            state.settings = {
+                storeName: document.getElementById('set-store-name').value.trim(),
+                currency: document.getElementById('set-currency').value,
+                tagline: document.getElementById('set-tagline').value.trim(),
+                whatsappNumber: document.getElementById('set-wa-number').value.replace(/\D/g, ''),
+                adminPassword: document.getElementById('set-admin-password').value.trim()
+            };
+
+            try {
+                localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(state.settings));
+            } catch (e) {}
+
+            if (state.useFirebase && state.db) {
+                try {
+                    await setDoc(doc(state.db, 'artifacts', state.appId, 'public', 'data', 'settings', 'general'), state.settings, { merge: true });
+                } catch (err) { console.warn(err); }
+            }
+
+            renderAll();
+            showToast("Store settings saved!");
+        };
+
+        window.testWhatsAppNumber = () => {
+            const num = document.getElementById('set-wa-number').value.replace(/\D/g, '');
+            if (!num) {
+                showToast("Enter a phone number first", true);
+                return;
+            }
+            window.open(`https://wa.me/${num}?text=${encodeURIComponent("Test message from my WhatsApp Store Admin Panel!")}`, '_blank', 'noopener,noreferrer');
+        };
+
+        window.resetDemoData = async () => {
+            state.products = [...SAMPLE_PRODUCTS];
+            persistProductsLocally();
+            renderAll();
+            showToast("Sample products restored!");
+        };
+
+        window.saveFirebaseConfig = async () => {
+            const raw = document.getElementById('set-firebase-json').value.trim();
+            try {
+                const parsed = JSON.parse(raw);
+                if (!parsed.apiKey || !parsed.projectId) throw new Error("Missing apiKey or projectId");
+                localStorage.setItem(STORAGE_KEYS.FB_CONFIG, JSON.stringify(parsed));
+                await connectFirebase(parsed);
+                showToast("Cloud sync connected!");
+            } catch (err) {
+                showToast("Invalid Firebase JSON config", true);
+            }
+        };
+
+        window.clearFirebaseConfig = () => {
+            localStorage.removeItem(STORAGE_KEYS.FB_CONFIG);
+            document.getElementById('set-firebase-json').value = '';
+            state.useFirebase = false;
+            updateSyncIndicator(false);
+            showToast("Disconnected from cloud sync");
+        };
+
+        // ------------------------------------------------------------
+        // 10. TOAST NOTIFICATIONS
+        // ------------------------------------------------------------
+        let toastTimer;
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const textEl = document.getElementById('toast-text');
+            const iconEl = document.getElementById('toast-icon');
+
+            textEl.textContent = msg;
+            iconEl.setAttribute('data-lucide', isError ? 'alert-circle' : 'check-circle-2');
+            iconEl.className = isError ? 'w-4 h-4 text-red-400' : 'w-4 h-4 text-whatsapp-500';
+            lucide.createIcons();
+
+            toast.classList.remove('opacity-0', 'translate-y-4');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+            }, 3000);
+        }
+
+        // Start App
+        initApp();
+    </script>
+</body>
+</html>
