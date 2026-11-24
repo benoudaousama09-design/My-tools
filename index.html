@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modern Boutique — WhatsApp Catalog</title>
+  <title>Mytool — WhatsApp Catalog</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
@@ -14,10 +14,10 @@
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow">
-          <i class="fa-solid fa-bag-shopping"></i>
+          <i class="fa-solid fa-screwdriver-wrench"></i>
         </div>
         <div>
-          <h1 id="headerStoreName" class="font-bold text-xl text-gray-900 leading-tight">Modern Boutique</h1>
+          <h1 id="headerStoreName" class="font-bold text-xl text-gray-900 leading-tight">Mytool</h1>
           <p class="text-xs text-emerald-600 font-medium flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Ready to Order via WhatsApp
           </p>
@@ -40,15 +40,15 @@
   <!-- PUBLIC STOREFRONT VIEW -->
   <main id="storefrontView" class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
     <div class="bg-gradient-to-r from-emerald-700 to-teal-600 rounded-2xl p-6 md:p-10 text-white mb-8 shadow-md">
-      <h2 id="heroStoreTitle" class="text-2xl md:text-4xl font-bold mb-2">Welcome to Modern Boutique</h2>
-      <p id="heroTagline" class="text-emerald-100 text-sm md:text-base max-w-xl">Select your favorite items, customize your quantities, and send your order directly to us on WhatsApp.</p>
+      <h2 id="heroStoreTitle" class="text-2xl md:text-4xl font-bold mb-2">Welcome to Mytool</h2>
+      <p id="heroTagline" class="text-emerald-100 text-sm md:text-base max-w-xl">Select your favorite tools and equipment, customize your quantities, and send your order directly to us on WhatsApp.</p>
     </div>
 
     <!-- Search & Category Filter -->
     <div class="flex flex-col sm:flex-row gap-3 mb-6">
       <div class="relative flex-1">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400"></i>
-        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search products..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search tools & products..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
       </div>
       <select id="categoryFilter" onchange="renderProducts()" class="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
         <option value="ALL">All Categories</option>
@@ -67,7 +67,7 @@
           <h2 class="text-2xl font-bold text-gray-900">Store Control Panel</h2>
           <span id="syncStatusBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Local Mode</span>
         </div>
-        <p class="text-sm text-gray-500">Manage your product catalog, stock availability, and WhatsApp order settings.</p>
+        <p class="text-sm text-gray-500">Manage inventory stock counts, customer pre-orders, and WhatsApp order settings.</p>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="openProductModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">
@@ -80,12 +80,20 @@
     </div>
 
     <!-- Admin Tabs -->
-    <div class="flex gap-4 border-b border-gray-200 mb-6">
-      <button id="tabProductsBtn" onclick="switchAdminTab('products')" class="pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600">Products</button>
-      <button id="tabSettingsBtn" onclick="switchAdminTab('settings')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700">Store & WhatsApp Settings</button>
+    <div class="flex gap-6 border-b border-gray-200 mb-6 overflow-x-auto">
+      <button id="tabProductsBtn" onclick="switchAdminTab('products')" class="pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 whitespace-nowrap">
+        Products & Stock
+      </button>
+      <button id="tabOrdersBtn" onclick="switchAdminTab('orders')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap flex items-center gap-1.5">
+        <span>Pre-Orders</span>
+        <span id="pendingOrdersBadge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+      </button>
+      <button id="tabSettingsBtn" onclick="switchAdminTab('settings')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">
+        Store & WhatsApp Settings
+      </button>
     </div>
 
-    <!-- Admin Products List -->
+    <!-- TAB 1: Admin Products & Stock List -->
     <div id="adminProductsTab" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
@@ -94,7 +102,7 @@
               <th class="py-3.5 px-4">Product</th>
               <th class="py-3.5 px-4">Category</th>
               <th class="py-3.5 px-4">Price</th>
-              <th class="py-3.5 px-4">Status</th>
+              <th class="py-3.5 px-4">In Stock</th>
               <th class="py-3.5 px-4 text-right">Actions</th>
             </tr>
           </thead>
@@ -103,7 +111,12 @@
       </div>
     </div>
 
-    <!-- Admin Store Settings Form -->
+    <!-- TAB 2: Admin Pre-Orders List -->
+    <div id="adminOrdersTab" class="hidden space-y-4">
+      <div id="adminOrdersList" class="grid grid-cols-1 gap-4"></div>
+    </div>
+
+    <!-- TAB 3: Admin Store Settings Form -->
     <div id="adminSettingsTab" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-2xl">
       <form onsubmit="saveStoreSettings(event)" class="space-y-4">
         <div>
@@ -135,7 +148,7 @@
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 mt-12">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-      <p id="footerCopy">© 2026 Modern Boutique. All rights reserved.</p>
+      <p id="footerCopy">© 2026 Mytool. All rights reserved.</p>
       <button onclick="openLoginModal()" class="text-gray-400 hover:text-white flex items-center gap-1.5 transition">
         <i class="fa-solid fa-lock"></i> Admin Login
       </button>
@@ -152,12 +165,13 @@
       <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
       <div class="p-4 border-t bg-gray-50 space-y-3">
         <input id="customerName" type="text" placeholder="Your Full Name *" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm bg-white" />
+        <input id="customerPhone" type="tel" placeholder="Your Phone Number *" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm bg-white" />
         <input id="customerAddress" type="text" placeholder="Delivery City / Address *" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm bg-white" />
         <div class="flex justify-between font-bold text-base pt-1">
           <span>Total</span>
           <span id="cartTotal">0 MAD</span>
         </div>
-        <button onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow">
+        <button id="checkoutBtn" onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow">
           <i class="fa-brands fa-whatsapp text-lg"></i> Send Order on WhatsApp
         </button>
       </div>
@@ -186,14 +200,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">Category *</label>
-            <input id="prodCategory" type="text" required placeholder="e.g. Accessories" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
+            <input id="prodCategory" type="text" required placeholder="e.g. Power Tools" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Availability</label>
-            <select id="prodStock" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm">
-              <option value="true">In Stock</option>
-              <option value="false">Out of Stock</option>
-            </select>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Amount in Stock *</label>
+            <input id="prodStockQty" type="number" min="0" step="1" required placeholder="e.g. 15" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
+            <p class="text-[11px] text-gray-400 mt-0.5">Set to 0 to mark as Sold Out.</p>
           </div>
         </div>
         <div>
@@ -262,22 +274,27 @@
     };
 
     const DEFAULT_SETTINGS = {
-      storeName: "Modern Boutique",
-      tagline: "Select your favorite items, customize your quantities, and send your order directly to us on WhatsApp.",
+      storeName: "Mytool",
+      tagline: "Select your favorite tools and equipment, customize your quantities, and send your order directly to us on WhatsApp.",
       whatsappNumber: "212600000000",
       currency: "MAD"
     };
 
     const DEFAULT_PRODUCTS = [
-      { id: "sample-1", name: "Classic Leather Bag", price: 350, category: "Accessories", inStock: true, image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600", description: "Handcrafted everyday shoulder bag." },
-      { id: "sample-2", name: "Minimalist Watch", price: 490, category: "Watches", inStock: true, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", description: "Water-resistant stainless steel timepiece." }
+      { id: "sample-1", name: "Cordless Hammer Drill 20V", price: 650, category: "Power Tools", stockQty: 12, image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600", description: "Heavy-duty brushless drill with 2 batteries." }
     ];
 
     let useCloud = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
     let db = null, auth = null, isAdmin = false;
     let storeSettings = { ...DEFAULT_SETTINGS };
     let products = [];
+    let orders = [];
     let cart = [];
+
+    function getStockCount(p) {
+      if (typeof p.stockQty === "number") return p.stockQty;
+      return p.inStock === false ? 0 : 10;
+    }
 
     if (useCloud) {
       firebase.initializeApp(firebaseConfig);
@@ -304,12 +321,19 @@
         renderProducts();
         renderAdminTable();
       });
+
+      db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snap => {
+        orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderOrdersList();
+      });
     } else {
       storeSettings = JSON.parse(localStorage.getItem("wa_store_settings")) || { ...DEFAULT_SETTINGS };
       products = JSON.parse(localStorage.getItem("wa_store_products")) || [...DEFAULT_PRODUCTS];
+      orders = JSON.parse(localStorage.getItem("wa_store_orders")) || [];
       applySettingsUI();
       renderProducts();
       renderAdminTable();
+      renderOrdersList();
     }
 
     function applySettingsUI() {
@@ -338,33 +362,48 @@
         (p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
       );
 
-      document.getElementById("productGrid").innerHTML = filtered.map(p => `
+      document.getElementById("productGrid").innerHTML = filtered.map(p => {
+        const stock = getStockCount(p);
+        const available = stock > 0;
+        const stockLabel = !available ? "Sold Out" : (stock <= 5 ? `Only ${stock} left` : `In Stock (${stock})`);
+        const badgeStyle = !available ? "bg-red-50 text-red-600" : (stock <= 5 ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700");
+
+        return `
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
           <img src="${p.image || 'https://placehold.co/600x400?text=Product'}" class="h-52 w-full object-cover bg-gray-100" />
           <div class="p-5 flex-1 flex flex-col">
             <div class="flex justify-between items-start gap-2 mb-1">
               <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">${p.category}</span>
-              <span class="text-xs px-2 py-0.5 rounded-full ${p.inStock ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${p.inStock ? 'In Stock' : 'Sold Out'}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full font-medium ${badgeStyle}">${stockLabel}</span>
             </div>
             <h3 class="font-bold text-gray-900 text-lg mb-1">${p.name}</h3>
             <p class="text-gray-500 text-sm mb-4 flex-1">${p.description}</p>
             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
               <span class="font-bold text-lg text-gray-900">${p.price} ${storeSettings.currency}</span>
-              <button onclick="addToCart('${p.id}')" ${!p.inStock ? "disabled" : ""} class="px-4 py-2 rounded-xl text-sm font-medium transition ${p.inStock ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}">
+              <button onclick="addToCart('${p.id}')" ${!available ? "disabled" : ""} class="px-4 py-2 rounded-xl text-sm font-medium transition ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}">
                 <i class="fa-solid fa-plus mr-1"></i> Add
               </button>
             </div>
           </div>
         </div>
-      `).join("");
+      `}).join("");
     }
 
     function addToCart(id) {
       const item = products.find(p => p.id === id);
-      if (!item || !item.inStock) return;
+      if (!item) return;
+      const maxStock = getStockCount(item);
+      if (maxStock <= 0) return;
+
       const existing = cart.find(c => c.id === id);
-      if (existing) existing.qty++;
-      else cart.push({ ...item, qty: 1 });
+      if (existing) {
+        if (existing.qty >= maxStock) {
+          return alert(`Only ${maxStock} units of "${item.name}" are available in stock.`);
+        }
+        existing.qty++;
+      } else {
+        cart.push({ ...item, qty: 1 });
+      }
       updateCartUI();
     }
 
@@ -388,22 +427,59 @@
     }
 
     function changeQty(idx, delta) {
-      cart[idx].qty += delta;
-      if (cart[idx].qty <= 0) cart.splice(idx, 1);
+      const cartItem = cart[idx];
+      const liveProd = products.find(p => p.id === cartItem.id);
+      const maxStock = liveProd ? getStockCount(liveProd) : 999;
+
+      if (delta > 0 && cartItem.qty + delta > maxStock) {
+        return alert(`Maximum available stock for "${cartItem.name}" is ${maxStock}.`);
+      }
+      cartItem.qty += delta;
+      if (cartItem.qty <= 0) cart.splice(idx, 1);
       updateCartUI();
     }
 
     function openCart() { document.getElementById("cartModal").classList.remove("hidden"); }
     function closeCart() { document.getElementById("cartModal").classList.add("hidden"); }
 
-    function checkoutWhatsApp() {
+    async function checkoutWhatsApp() {
       if (!cart.length) return alert("Your cart is empty.");
       const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
       const addr = document.getElementById("customerAddress").value.trim();
-      if (!name || !addr) return alert("Please enter your name and delivery address.");
-      const lines = cart.map(i => `• ${i.name} (x${i.qty}) - ${i.price * i.qty} ${storeSettings.currency}`).join("\n");
+      if (!name || !phone || !addr) return alert("Please enter your name, phone number, and delivery address.");
+
       const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      const msg = `Hello *${storeSettings.storeName}*, I would like to place an order:\n\n${lines}\n\n*Total:* ${total} ${storeSettings.currency}\n*Name:* ${name}\n*Address:* ${addr}`;
+      const orderRecord = {
+        customerName: name,
+        customerPhone: phone,
+        customerAddress: addr,
+        items: cart.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+        total: total,
+        currency: storeSettings.currency,
+        status: "Pending",
+        createdAt: Date.now()
+      };
+
+      // Save Pre-Order to Firebase or LocalStorage
+      try {
+        if (useCloud) {
+          await db.collection("orders").add(orderRecord);
+        } else {
+          orders.unshift({ id: "ord-" + Date.now(), ...orderRecord });
+          localStorage.setItem("wa_store_orders", JSON.stringify(orders));
+          renderOrdersList();
+        }
+      } catch (err) {
+        console.error("Order log warning:", err);
+      }
+
+      const lines = cart.map(i => {
+        const imgLine = (i.image && i.image.startsWith("http")) ? `\n  Photo: ${i.image}` : "";
+        return `• ${i.name} (x${i.qty}) - ${i.price * i.qty} ${storeSettings.currency}${imgLine}`;
+      }).join("\n\n");
+
+      const msg = `Hello *${storeSettings.storeName}*, I would like to place an order:\n\n${lines}\n\n*Total:* ${total} ${storeSettings.currency}\n*Name:* ${name}\n*Phone:* ${phone}\n*Address:* ${addr}`;
       window.open(`https://wa.me/${storeSettings.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
     }
 
@@ -452,6 +528,7 @@
     function updateAdminUI() {
       document.getElementById("adminBarBtn").classList.toggle("hidden", !isAdmin);
       renderAdminTable();
+      renderOrdersList();
     }
 
     function toggleAdminView(forceAdmin) {
@@ -462,13 +539,27 @@
 
     function switchAdminTab(tab) {
       document.getElementById("adminProductsTab").classList.toggle("hidden", tab !== "products");
+      document.getElementById("adminOrdersTab").classList.toggle("hidden", tab !== "orders");
       document.getElementById("adminSettingsTab").classList.toggle("hidden", tab !== "settings");
-      document.getElementById("tabProductsBtn").className = tab === "products" ? "pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600" : "pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500";
-      document.getElementById("tabSettingsBtn").className = tab === "settings" ? "pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600" : "pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500";
+
+      const activeClass = "pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 whitespace-nowrap";
+      const inactiveClass = "pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap";
+
+      document.getElementById("tabProductsBtn").className = tab === "products" ? activeClass : inactiveClass;
+      document.getElementById("tabOrdersBtn").className = (tab === "orders" ? activeClass : inactiveClass) + " flex items-center gap-1.5";
+      document.getElementById("tabSettingsBtn").className = tab === "settings" ? activeClass : inactiveClass;
     }
 
     function renderAdminTable() {
-      document.getElementById("adminProductTable").innerHTML = products.map(p => `
+      document.getElementById("adminProductTable").innerHTML = products.map(p => {
+        const stock = getStockCount(p);
+        const stockBadge = stock === 0
+          ? `<span class="text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-600 font-semibold">0 (Sold Out)</span>`
+          : (stock <= 5
+            ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold">${stock} units (Low)</span>`
+            : `<span class="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold">${stock} units</span>`);
+
+        return `
         <tr>
           <td class="py-3 px-4 font-medium flex items-center gap-3">
             <img src="${p.image || 'https://placehold.co/100'}" class="w-10 h-10 rounded-lg object-cover" />
@@ -476,13 +567,102 @@
           </td>
           <td class="py-3 px-4 text-gray-500">${p.category}</td>
           <td class="py-3 px-4 font-semibold">${p.price} ${storeSettings.currency}</td>
-          <td class="py-3 px-4"><span class="text-xs px-2 py-0.5 rounded-full ${p.inStock ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${p.inStock ? 'In Stock' : 'Out'}</span></td>
+          <td class="py-3 px-4">${stockBadge}</td>
           <td class="py-3 px-4 text-right space-x-2">
             <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:underline text-xs font-medium">Edit</button>
             <button onclick="deleteProduct('${p.id}')" class="text-red-600 hover:underline text-xs font-medium">Delete</button>
           </td>
         </tr>
-      `).join("");
+      `}).join("");
+    }
+
+    function renderOrdersList() {
+      const pendingCount = orders.filter(o => o.status === "Pending").length;
+      document.getElementById("pendingOrdersBadge").textContent = pendingCount;
+
+      const container = document.getElementById("adminOrdersList");
+      if (!orders.length) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-gray-400 text-sm border border-gray-100">No customer pre-orders recorded yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(o => {
+        const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString() : "Recent";
+        const isConfirmed = o.status === "Confirmed";
+        const itemsHtml = (o.items || []).map(i => `<li class="text-xs text-gray-600">• <strong>${i.qty}×</strong> ${i.name} (${i.price * i.qty} ${o.currency || storeSettings.currency})</li>`).join("");
+
+        return `
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-gray-900 text-base">${o.customerName}</span>
+              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md"><i class="fa-solid fa-phone mr-1"></i>${o.customerPhone || 'N/A'}</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold ${isConfirmed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${o.status || 'Pending'}</span>
+            </div>
+            <p class="text-xs text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${o.customerAddress} &bull; <span class="text-gray-400">${dateStr}</span></p>
+            <ul class="pt-1 space-y-0.5">${itemsHtml}</ul>
+          </div>
+
+          <div class="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between gap-3 border-t md:border-t-0 pt-3 md:pt-0">
+            <span class="font-bold text-lg text-emerald-700">${o.total} ${o.currency || storeSettings.currency}</span>
+            <div class="flex items-center gap-2">
+              ${!isConfirmed ? `
+                <button onclick="confirmOrder('${o.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                  <i class="fa-solid fa-check mr-1"></i> Confirm & Deduct Stock
+                </button>
+              ` : ""}
+              <button onclick="deleteOrder('${o.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `}).join("");
+    }
+
+    async function confirmOrder(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order || order.status === "Confirmed") return;
+      if (!confirm("Confirm this order and automatically deduct the ordered quantities from your product stock?")) return;
+
+      try {
+        if (useCloud) {
+          await db.collection("orders").doc(orderId).update({ status: "Confirmed" });
+          for (const item of (order.items || [])) {
+            const prod = products.find(p => p.id === item.id);
+            if (prod) {
+              const newStock = Math.max(0, getStockCount(prod) - item.qty);
+              await db.collection("products").doc(prod.id).update({ stockQty: newStock, inStock: newStock > 0 });
+            }
+          }
+        } else {
+          order.status = "Confirmed";
+          for (const item of (order.items || [])) {
+            const prod = products.find(p => p.id === item.id);
+            if (prod) {
+              prod.stockQty = Math.max(0, getStockCount(prod) - item.qty);
+              prod.inStock = prod.stockQty > 0;
+            }
+          }
+          localStorage.setItem("wa_store_orders", JSON.stringify(orders));
+          localStorage.setItem("wa_store_products", JSON.stringify(products));
+          renderOrdersList();
+          renderAdminTable();
+          renderProducts();
+        }
+      } catch (err) {
+        alert("Could not update order: " + err.message);
+      }
+    }
+
+    async function deleteOrder(orderId) {
+      if (!confirm("Remove this pre-order from the list?")) return;
+      if (useCloud) await db.collection("orders").doc(orderId).delete();
+      else {
+        orders = orders.filter(o => o.id !== orderId);
+        localStorage.setItem("wa_store_orders", JSON.stringify(orders));
+        renderOrdersList();
+      }
     }
 
     function handleImageUpload(e) {
@@ -516,7 +696,7 @@
       document.getElementById("prodName").value = p ? p.name : "";
       document.getElementById("prodPrice").value = p ? p.price : "";
       document.getElementById("prodCategory").value = p ? p.category : "";
-      document.getElementById("prodStock").value = p ? String(p.inStock) : "true";
+      document.getElementById("prodStockQty").value = p ? getStockCount(p) : 10;
       document.getElementById("prodImage").value = p ? p.image : "";
       document.getElementById("prodDesc").value = p ? p.description : "";
       const prev = document.getElementById("imagePreview");
@@ -528,11 +708,13 @@
     async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById("editProductId").value;
+      const qty = parseInt(document.getElementById("prodStockQty").value, 10) || 0;
       const data = {
         name: document.getElementById("prodName").value.trim(),
         price: parseFloat(document.getElementById("prodPrice").value),
         category: document.getElementById("prodCategory").value.trim(),
-        inStock: document.getElementById("prodStock").value === "true",
+        stockQty: qty,
+        inStock: qty > 0,
         image: document.getElementById("prodImage").value.trim(),
         description: document.getElementById("prodDesc").value.trim()
       };
