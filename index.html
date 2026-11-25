@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Mytool — WhatsApp Catalog</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -11,6 +11,11 @@
     };
   </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Hide scrollbar for horizontal category pills on mobile */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
   <script>
     if (
       localStorage.getItem("theme") === "dark" ||
@@ -20,98 +25,111 @@
     }
   </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200 pb-20 sm:pb-0">
 
   <!-- Top Store Header -->
-  <header class="bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-950/50 border-b border-transparent dark:border-gray-800 sticky top-0 z-30 transition-colors">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow">
+  <header class="bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-950/50 border-b border-gray-100 dark:border-gray-800 sticky top-0 z-30 transition-colors">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-base sm:text-lg shadow">
           <i class="fa-solid fa-bag-shopping"></i>
         </div>
-        <div>
-          <h1 id="headerStoreName" class="font-bold text-xl text-gray-900 dark:text-white leading-tight">Mytool</h1>
-          <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Ready to Order via WhatsApp
+        <div class="min-w-0">
+          <h1 id="headerStoreName" class="font-bold text-lg sm:text-xl text-gray-900 dark:text-white leading-tight truncate">Mytool</h1>
+          <p class="text-[11px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 truncate">
+            <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 shrink-0 rounded-full bg-emerald-500 inline-block"></span> WhatsApp Order
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3">
+      <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
         <button id="themeToggleBtn" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-amber-400 flex items-center justify-center text-sm transition">
           <i id="themeIcon" class="fa-solid fa-moon"></i>
         </button>
-        <button id="adminBarBtn" onclick="toggleAdminView()" class="hidden text-sm bg-gray-900 dark:bg-gray-800 text-white px-3.5 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-700 border border-transparent dark:border-gray-700 transition">
-          <i class="fa-solid fa-sliders mr-1"></i> Dashboard
+        <button id="adminBarBtn" onclick="toggleAdminView()" class="hidden text-xs sm:text-sm bg-gray-900 dark:bg-gray-800 text-white px-2.5 sm:px-3.5 py-2 rounded-xl hover:bg-gray-800 dark:hover:bg-gray-700 border border-transparent dark:border-gray-700 transition">
+          <i class="fa-solid fa-sliders sm:mr-1"></i> <span class="hidden sm:inline">Dashboard</span>
         </button>
-        <button onclick="openCart()" class="relative bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition">
+        <button onclick="openCart()" class="relative bg-emerald-600 hover:bg-emerald-700 text-white px-3 sm:px-4 py-2 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-sm transition">
           <i class="fa-solid fa-cart-shopping"></i>
-          <span>Cart</span>
-          <span id="cartCount" class="bg-white text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+          <span class="hidden xs:inline sm:inline">Cart</span>
+          <span id="cartCount" class="bg-white text-emerald-700 text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full">0</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- PUBLIC STOREFRONT VIEW -->
-  <main id="storefrontView" class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-    <div class="bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-900 dark:to-teal-800 rounded-2xl p-6 md:p-10 text-white mb-8 shadow-md">
-      <h2 id="heroStoreTitle" class="text-2xl md:text-4xl font-bold mb-2">Welcome to Mytool</h2>
-      <p id="heroTagline" class="text-emerald-100 text-sm md:text-base max-w-xl">Select your favorite tools and equipment, customize your quantities, and send your order directly to us on WhatsApp.</p>
+  <main id="storefrontView" class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-8">
+    <!-- Compact Hero Banner on Mobile -->
+    <div class="bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-900 dark:to-teal-800 rounded-2xl p-4 sm:p-8 md:p-10 text-white mb-4 sm:mb-8 shadow-md">
+      <h2 id="heroStoreTitle" class="text-xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">Welcome to Mytool</h2>
+      <p id="heroTagline" class="text-emerald-100 text-xs sm:text-sm md:text-base max-w-xl leading-relaxed">Select your favorite tools and equipment, customize your quantities, and send your order directly to us on WhatsApp.</p>
     </div>
 
-    <!-- Search & Category Filter -->
-    <div class="flex flex-col sm:flex-row gap-3 mb-6">
-      <div class="relative flex-1">
-        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400"></i>
-        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search tools & products..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+    <!-- Search & Swipeable Category Pills -->
+    <div class="space-y-3 mb-4 sm:mb-6">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-sm"></i>
+        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search tools & products..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-base sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
       </div>
-      <select id="categoryFilter" onchange="renderProducts()" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        <option value="ALL">All Categories</option>
-      </select>
+      <div id="categoryPills" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1"></div>
     </div>
 
-    <!-- Product Grid -->
-    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <!-- Product Grid: 2 Columns on Mobile, 3 on Desktop -->
+    <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6"></div>
   </main>
 
+  <!-- FLOATING MOBILE CART BAR (Appears when cart has items) -->
+  <div id="mobileFloatingCart" class="hidden sm:hidden fixed bottom-3 left-3 right-3 z-30">
+    <button onclick="openCart()" class="w-full bg-emerald-600 active:bg-emerald-700 text-white px-4 py-3.5 rounded-2xl shadow-xl flex items-center justify-between font-semibold text-sm">
+      <div class="flex items-center gap-2">
+        <span id="floatingCartCount" class="bg-white text-emerald-700 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+        <span>View Order Cart</span>
+      </div>
+      <span id="floatingCartTotal" class="font-bold">0 MAD</span>
+    </button>
+  </div>
+
   <!-- ADMIN CONTROL PANEL VIEW -->
-  <section id="adminView" class="hidden flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+  <section id="adminView" class="hidden flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-5 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
       <div>
-        <div class="flex items-center gap-2">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Store Control Panel</h2>
-          <span id="syncStatusBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Local Mode</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Control Panel</h2>
+          <span id="syncStatusBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Local Mode</span>
         </div>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Manage inventory stock counts, customer pre-orders, and WhatsApp order settings.</p>
+        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">Manage stock counts, pre-orders, and WhatsApp settings.</p>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="openProductModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">
-          <i class="fa-solid fa-plus mr-1"></i> Add New Product
+        <button onclick="openProductModal()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-medium shadow-sm text-center">
+          <i class="fa-solid fa-plus mr-1"></i> Add Product
         </button>
-        <button onclick="logoutAdmin()" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3.5 py-2.5 rounded-xl text-sm font-medium">
+        <button onclick="logoutAdmin()" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-medium">
           Logout
         </button>
       </div>
     </div>
 
     <!-- Admin Tabs -->
-    <div class="flex gap-6 border-b border-gray-200 dark:border-gray-800 mb-6 overflow-x-auto">
-      <button id="tabProductsBtn" onclick="switchAdminTab('products')" class="pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+    <div class="flex gap-5 border-b border-gray-200 dark:border-gray-800 mb-5 overflow-x-auto no-scrollbar">
+      <button id="tabProductsBtn" onclick="switchAdminTab('products')" class="pb-3 text-xs sm:text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
         Products & Stock
       </button>
-      <button id="tabOrdersBtn" onclick="switchAdminTab('orders')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap flex items-center gap-1.5">
+      <button id="tabOrdersBtn" onclick="switchAdminTab('orders')" class="pb-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap flex items-center gap-1.5">
         <span>Pre-Orders</span>
         <span id="pendingOrdersBadge" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
       </button>
-      <button id="tabSettingsBtn" onclick="switchAdminTab('settings')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap">
-        Store & WhatsApp Settings
+      <button id="tabSettingsBtn" onclick="switchAdminTab('settings')" class="pb-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap">
+        Settings
       </button>
     </div>
 
-    <!-- TAB 1: Admin Products & Stock List -->
-    <div id="adminProductsTab" class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-      <div class="overflow-x-auto">
+    <!-- TAB 1: Admin Products & Stock List (Responsive Cards on Mobile, Table on Desktop) -->
+    <div id="adminProductsTab">
+      <!-- Mobile Product Cards -->
+      <div id="adminProductMobileList" class="sm:hidden space-y-3"></div>
+      <!-- Desktop Table -->
+      <div class="hidden sm:block bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
         <table class="w-full text-left border-collapse">
           <thead class="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
             <tr>
@@ -128,33 +146,33 @@
     </div>
 
     <!-- TAB 2: Admin Pre-Orders List -->
-    <div id="adminOrdersTab" class="hidden space-y-4">
-      <div id="adminOrdersList" class="grid grid-cols-1 gap-4"></div>
+    <div id="adminOrdersTab" class="hidden space-y-3 sm:space-y-4">
+      <div id="adminOrdersList" class="grid grid-cols-1 gap-3 sm:gap-4"></div>
     </div>
 
     <!-- TAB 3: Admin Store Settings Form -->
-    <div id="adminSettingsTab" class="hidden bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 max-w-2xl">
+    <div id="adminSettingsTab" class="hidden bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-6 max-w-2xl">
       <form onsubmit="saveStoreSettings(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Store Name</label>
-          <input id="settingStoreName" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Store Name</label>
+          <input id="settingStoreName" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hero Tagline</label>
-          <input id="settingTagline" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
+          <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hero Tagline</label>
+          <input id="settingTagline" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">WhatsApp Number (with country code)</label>
-            <input id="settingWhatsapp" type="text" placeholder="e.g. 212612345678" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">WhatsApp Number (with country code)</label>
+            <input id="settingWhatsapp" type="text" placeholder="e.g. 212612345678" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
             <p class="text-xs text-gray-400 mt-1">Digits only, no + or spaces (e.g., 212600000000).</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency Symbol</label>
-            <input id="settingCurrency" type="text" placeholder="MAD, $, €" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency Symbol</label>
+            <input id="settingCurrency" type="text" placeholder="MAD, $, €" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
           </div>
         </div>
-        <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium">
+        <button type="submit" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 sm:py-2.5 rounded-xl text-sm font-medium">
           Save Store Settings
         </button>
       </form>
@@ -162,41 +180,41 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 dark:bg-black text-gray-400 py-6 mt-12 border-t border-transparent dark:border-gray-800">
-    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+  <footer class="bg-gray-900 dark:bg-black text-gray-400 py-5 sm:py-6 mt-8 sm:mt-12 border-t border-transparent dark:border-gray-800">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
       <p id="footerCopy">© 2026 Mytool. All rights reserved.</p>
-      <button onclick="openLoginModal()" class="text-gray-400 hover:text-white flex items-center gap-1.5 transition">
+      <button onclick="openLoginModal()" class="text-gray-400 hover:text-white flex items-center gap-1.5 py-1 px-2 transition">
         <i class="fa-solid fa-lock"></i> Admin Login
       </button>
     </div>
   </footer>
 
   <!-- PRODUCT IMAGE ZOOM / QUICK VIEW MODAL -->
-  <div id="imageZoomModal" onclick="if(event.target === this) closeImageZoom()" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl border border-transparent dark:border-gray-800 flex flex-col max-h-[90vh]">
-      <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-800">
+  <div id="imageZoomModal" onclick="if(event.target === this) closeImageZoom()" class="hidden fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center sm:p-4 backdrop-blur-sm">
+    <div class="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl border-t sm:border border-gray-200 dark:border-gray-800 flex flex-col max-h-[92vh]">
+      <div class="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-800">
         <div class="flex items-center gap-2">
           <span id="zoomCategory" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide"></span>
           <span id="zoomStockBadge" class="text-xs px-2 py-0.5 rounded-full font-medium"></span>
         </div>
-        <button onclick="closeImageZoom()" class="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl">&times;</button>
+        <button onclick="closeImageZoom()" class="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 text-xl">&times;</button>
       </div>
 
-      <div class="bg-gray-100 dark:bg-gray-950 relative flex items-center justify-center overflow-auto max-h-[55vh] p-2">
-        <img id="zoomImage" onclick="toggleZoomScale()" src="" alt="Product Preview" class="max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in" />
+      <div class="bg-gray-100 dark:bg-gray-950 relative flex items-center justify-center overflow-auto max-h-[48vh] sm:max-h-[55vh] p-2">
+        <img id="zoomImage" onclick="toggleZoomScale()" src="" alt="Product Preview" class="max-h-[45vh] sm:max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in" />
         <button onclick="toggleZoomScale()" class="absolute bottom-3 right-3 bg-black/70 hover:bg-black/85 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow">
           <i id="zoomIcon" class="fa-solid fa-magnifying-glass-plus"></i>
           <span id="zoomLabel">Zoom In</span>
         </button>
       </div>
 
-      <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+      <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-y-auto">
         <div class="space-y-1 flex-1">
-          <h3 id="zoomTitle" class="font-bold text-xl text-gray-900 dark:text-white"></h3>
-          <p id="zoomDesc" class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed"></p>
+          <h3 id="zoomTitle" class="font-bold text-lg sm:text-xl text-gray-900 dark:text-white"></h3>
+          <p id="zoomDesc" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed"></p>
         </div>
-        <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-gray-800">
-          <span id="zoomPrice" class="font-bold text-xl text-gray-900 dark:text-white"></span>
+        <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-800">
+          <span id="zoomPrice" class="font-bold text-lg sm:text-xl text-gray-900 dark:text-white"></span>
           <button id="zoomAddBtn" class="px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i> Add to Cart
           </button>
@@ -205,23 +223,23 @@
     </div>
   </div>
 
-  <!-- CART DRAWER MODAL -->
-  <div id="cartModal" class="hidden fixed inset-0 bg-black/60 z-50 flex justify-end">
-    <div class="bg-white dark:bg-gray-900 w-full max-w-md h-full flex flex-col shadow-2xl border-l border-transparent dark:border-gray-800">
+  <!-- CART DRAWER MODAL (Bottom Sheet on Mobile, Right Drawer on Desktop) -->
+  <div id="cartModal" onclick="if(event.target === this) closeCart()" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-stretch sm:justify-end">
+    <div class="bg-white dark:bg-gray-900 w-full sm:max-w-md h-[88vh] sm:h-full rounded-t-3xl sm:rounded-none flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-gray-200 dark:border-gray-800">
       <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
         <h3 class="font-bold text-lg text-gray-900 dark:text-white">Your Order Cart</h3>
-        <button onclick="closeCart()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white text-xl">&times;</button>
+        <button onclick="closeCart()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xl">&times;</button>
       </div>
-      <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-      <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/60 space-y-3">
-        <input id="customerName" type="text" placeholder="Your Full Name *" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
-        <input id="customerPhone" type="tel" placeholder="Your Phone Number (Optional)" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
-        <input id="customerAddress" type="text" placeholder="Delivery City / Address *" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
+      <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-2.5"></div>
+      <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/60 space-y-2.5">
+        <input id="customerName" type="text" placeholder="Your Full Name *" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
+        <input id="customerPhone" type="tel" placeholder="Your Phone Number (Optional)" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
+        <input id="customerAddress" type="text" placeholder="Delivery City / Address *" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
         <div class="flex justify-between font-bold text-base pt-1 text-gray-900 dark:text-white">
           <span>Total</span>
           <span id="cartTotal">0 MAD</span>
         </div>
-        <button id="checkoutBtn" onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow">
+        <button id="checkoutBtn" onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow">
           <i class="fa-brands fa-whatsapp text-lg"></i> Send Order on WhatsApp
         </button>
       </div>
@@ -229,40 +247,40 @@
   </div>
 
   <!-- ADD / EDIT PRODUCT MODAL -->
-  <div id="productModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 shadow-xl border border-transparent dark:border-gray-800 max-h-[90vh] overflow-y-auto">
+  <div id="productModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center sm:p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-2xl w-full max-w-lg p-5 sm:p-6 shadow-xl border-t sm:border border-gray-200 dark:border-gray-800 max-h-[92vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
         <h3 id="productModalTitle" class="font-bold text-lg text-gray-900 dark:text-white">Add New Product</h3>
-        <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white text-xl">&times;</button>
+        <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xl">&times;</button>
       </div>
-      <form onsubmit="saveProduct(event)" class="space-y-4">
+      <form onsubmit="saveProduct(event)" class="space-y-3.5">
         <input type="hidden" id="editProductId" />
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Product Name *</label>
-            <input id="prodName" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
+            <input id="prodName" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Price *</label>
-            <input id="prodPrice" type="number" step="0.01" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
+            <input id="prodPrice" type="number" step="0.01" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Category *</label>
-            <input id="prodCategory" type="text" required placeholder="e.g. Power Tools" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
+            <input id="prodCategory" type="text" required placeholder="e.g. Power Tools" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Amount in Stock *</label>
-            <input id="prodStockQty" type="number" min="0" step="1" required placeholder="e.g. 15" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
+            <input id="prodStockQty" type="number" min="0" step="1" required placeholder="e.g. 15" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
             <p class="text-[11px] text-gray-400 mt-0.5">Set to 0 to mark as Sold Out.</p>
           </div>
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Product Image (Paste URL or Upload Photo)</label>
           <div class="flex gap-2">
-            <input id="prodImage" type="text" placeholder="https://... or upload photo" class="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
-            <label class="cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 border border-gray-300 dark:border-gray-700">
+            <input id="prodImage" type="text" placeholder="https://... or upload photo" class="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
+            <label class="cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3.5 py-2.5 rounded-xl text-xs font-medium flex items-center gap-1.5 border border-gray-300 dark:border-gray-700 shrink-0">
               <i class="fa-solid fa-upload"></i> Upload
               <input type="file" accept="image/*" onchange="handleImageUpload(event)" class="hidden" />
             </label>
@@ -271,22 +289,22 @@
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Description *</label>
-          <textarea id="prodDesc" rows="3" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white"></textarea>
+          <textarea id="prodDesc" rows="3" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white"></textarea>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Cancel</button>
-          <button type="submit" id="saveProdBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-medium">Save Product</button>
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Cancel</button>
+          <button type="submit" id="saveProdBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium">Save Product</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- ADMIN LOGIN MODAL -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-sm p-6 shadow-xl border border-transparent dark:border-gray-800">
+  <div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center sm:p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-2xl w-full max-w-sm p-6 shadow-xl border-t sm:border border-gray-200 dark:border-gray-800">
       <div class="flex justify-between items-center mb-3">
         <h3 class="font-bold text-lg text-gray-900 dark:text-white">Admin Sign In</h3>
-        <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white text-xl">&times;</button>
+        <button onclick="closeLoginModal()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-300 text-xl">&times;</button>
       </div>
       <div class="mb-4">
         <span id="loginModeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Local Mode</span>
@@ -294,14 +312,14 @@
       <form onsubmit="handleAdminLogin(event)" class="space-y-3">
         <div id="emailFieldWrap" class="hidden">
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Admin Email</label>
-          <input id="adminEmail" type="email" placeholder="admin@store.com" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
+          <input id="adminEmail" type="email" placeholder="admin@store.com" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Password</label>
-          <input id="adminPassword" type="password" required placeholder="••••••••" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
+          <input id="adminPassword" type="password" required placeholder="••••••••" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-gray-900 dark:text-white" />
         </div>
         <p id="loginError" class="hidden text-xs text-red-500 font-medium"></p>
-        <button type="submit" class="w-full bg-gray-900 dark:bg-emerald-600 hover:bg-gray-800 dark:hover:bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
+        <button type="submit" class="w-full bg-gray-900 dark:bg-emerald-600 hover:bg-gray-800 dark:hover:bg-emerald-700 text-white py-3 rounded-xl text-sm font-medium transition">
           Access Dashboard
         </button>
       </form>
@@ -356,6 +374,7 @@
     let products = [];
     let orders = [];
     let cart = [];
+    let selectedCategory = "ALL";
     let isZoomedIn = false;
 
     function getStockCount(p) {
@@ -368,7 +387,7 @@
       db = firebase.firestore();
       auth = firebase.auth();
       document.getElementById("syncStatusBadge").textContent = "Cloud Sync Active";
-      document.getElementById("syncStatusBadge").className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300";
+      document.getElementById("syncStatusBadge").className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300";
       document.getElementById("loginModeBadge").textContent = "Cloud Sync Active";
       document.getElementById("loginModeBadge").className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300";
       document.getElementById("emailFieldWrap").classList.remove("hidden");
@@ -417,47 +436,57 @@
       updateCartUI();
     }
 
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderProducts();
+    }
+
     function renderProducts() {
       const q = document.getElementById("searchInput").value.toLowerCase();
-      const cat = document.getElementById("categoryFilter").value;
       const cats = ["ALL", ...new Set(products.map(p => p.category))];
-      const catSel = document.getElementById("categoryFilter");
-      catSel.innerHTML = cats.map(c => `<option value="${c}" ${c === cat ? "selected" : ""}>${c === "ALL" ? "All Categories" : c}</option>`).join("");
+      if (!cats.includes(selectedCategory)) selectedCategory = "ALL";
+
+      document.getElementById("categoryPills").innerHTML = cats.map(c => {
+        const active = c === selectedCategory;
+        const label = c === "ALL" ? "All Tools" : c;
+        const cls = active
+          ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+          : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800 hover:border-emerald-500";
+        return `<button onclick="selectCategory('${c.replace(/'/g, "\\'")}')" class="px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium border whitespace-nowrap transition ${cls}">${label}</button>`;
+      }).join("");
 
       const filtered = products.filter(p =>
-        (cat === "ALL" || p.category === cat) &&
+        (selectedCategory === "ALL" || p.category === selectedCategory) &&
         (p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
       );
 
       document.getElementById("productGrid").innerHTML = filtered.map(p => {
         const stock = getStockCount(p);
         const available = stock > 0;
-        const stockLabel = !available ? "Sold Out" : (stock <= 5 ? `Only ${stock} left` : `In Stock (${stock})`);
+        const stockLabel = !available ? "Sold Out" : (stock <= 5 ? `${stock} left` : `${stock} in stock`);
         const badgeStyle = !available
-          ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+          ? "bg-red-500/90 text-white"
           : (stock <= 5
-            ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
-            : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400");
+            ? "bg-amber-500/95 text-white"
+            : "bg-black/65 text-white");
 
         return `
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col group transition-colors">
-          <div onclick="openImageZoom('${p.id}')" class="relative h-52 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden cursor-zoom-in">
+          <div onclick="openImageZoom('${p.id}')" class="relative h-36 sm:h-52 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden cursor-zoom-in">
             <img src="${p.image || 'https://placehold.co/600x400?text=Product'}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-            <span class="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-xs px-2.5 py-1 rounded-full opacity-90 sm:opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+            <span class="absolute top-2 left-2 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-semibold backdrop-blur-sm ${badgeStyle}">${stockLabel}</span>
+            <span class="hidden sm:flex absolute bottom-2.5 right-2.5 bg-black/65 text-white text-xs px-2.5 py-1 rounded-full opacity-0 group-hover:opacity-100 transition items-center gap-1">
               <i class="fa-solid fa-expand"></i> View
             </span>
           </div>
-          <div class="p-5 flex-1 flex flex-col">
-            <div class="flex justify-between items-start gap-2 mb-1">
-              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">${p.category}</span>
-              <span class="text-xs px-2 py-0.5 rounded-full font-medium ${badgeStyle}">${stockLabel}</span>
-            </div>
-            <h3 onclick="openImageZoom('${p.id}')" class="font-bold text-gray-900 dark:text-white text-lg mb-1 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition">${p.name}</h3>
-            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 flex-1">${p.description}</p>
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-              <span class="font-bold text-lg text-gray-900 dark:text-white">${p.price} ${storeSettings.currency}</span>
-              <button onclick="addToCart('${p.id}')" ${!available ? "disabled" : ""} class="px-4 py-2 rounded-xl text-sm font-medium transition ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'}">
-                <i class="fa-solid fa-plus mr-1"></i> Add
+          <div class="p-3 sm:p-5 flex-1 flex flex-col">
+            <span class="text-[10px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-0.5 truncate">${p.category}</span>
+            <h3 onclick="openImageZoom('${p.id}')" class="font-bold text-gray-900 dark:text-white text-sm sm:text-lg leading-snug mb-1 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition line-clamp-2">${p.name}</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-3 sm:mb-4 flex-1 line-clamp-2">${p.description}</p>
+            <div class="flex items-center justify-between gap-1.5 pt-2.5 sm:pt-3 border-t border-gray-100 dark:border-gray-800">
+              <span class="font-bold text-sm sm:text-lg text-gray-900 dark:text-white">${p.price} <span class="text-xs font-semibold">${storeSettings.currency}</span></span>
+              <button onclick="addToCart('${p.id}')" ${!available ? "disabled" : ""} class="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition shrink-0 ${available ? 'bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'}">
+                <i class="fa-solid fa-plus"></i> <span class="hidden xs:inline sm:inline ml-0.5">Add</span>
               </button>
             </div>
           </div>
@@ -481,7 +510,7 @@
       const imgEl = document.getElementById("zoomImage");
       imgEl.src = p.image || "https://placehold.co/600x400?text=Product";
       imgEl.style.transform = "scale(1)";
-      imgEl.className = "max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in";
+      imgEl.className = "max-h-[45vh] sm:max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in";
       document.getElementById("zoomIcon").className = "fa-solid fa-magnifying-glass-plus";
       document.getElementById("zoomLabel").textContent = "Zoom In";
 
@@ -510,7 +539,7 @@
       const imgEl = document.getElementById("zoomImage");
       imgEl.style.transform = isZoomedIn ? "scale(1.75)" : "scale(1)";
       imgEl.style.transformOrigin = "center center";
-      imgEl.className = `max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 ${isZoomedIn ? 'cursor-zoom-out' : 'cursor-zoom-in'}`;
+      imgEl.className = `max-h-[45vh] sm:max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 ${isZoomedIn ? 'cursor-zoom-out' : 'cursor-zoom-in'}`;
       document.getElementById("zoomIcon").className = isZoomedIn ? "fa-solid fa-magnifying-glass-minus" : "fa-solid fa-magnifying-glass-plus";
       document.getElementById("zoomLabel").textContent = isZoomedIn ? "Reset Zoom" : "Zoom In";
     }
@@ -542,19 +571,32 @@
     }
 
     function updateCartUI() {
-      document.getElementById("cartCount").textContent = cart.reduce((s, i) => s + i.qty, 0);
+      const totalItems = cart.reduce((s, i) => s + i.qty, 0);
       const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+      document.getElementById("cartCount").textContent = totalItems;
       document.getElementById("cartTotal").textContent = `${total} ${storeSettings.currency}`;
+
+      // Update mobile floating cart bar
+      const floatingBar = document.getElementById("mobileFloatingCart");
+      if (totalItems > 0 && document.getElementById("adminView").classList.contains("hidden")) {
+        floatingBar.classList.remove("hidden");
+        document.getElementById("floatingCartCount").textContent = totalItems;
+        document.getElementById("floatingCartTotal").textContent = `${total} ${storeSettings.currency}`;
+      } else {
+        floatingBar.classList.add("hidden");
+      }
+
       document.getElementById("cartItemsContainer").innerHTML = cart.length ? cart.map((i, idx) => `
-        <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/70 p-3 rounded-xl">
-          <div>
-            <p class="font-semibold text-sm text-gray-900 dark:text-white">${i.name}</p>
+        <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/70 p-3 rounded-xl gap-2">
+          <div class="min-w-0">
+            <p class="font-semibold text-sm text-gray-900 dark:text-white truncate">${i.name}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">${i.price} ${storeSettings.currency} × ${i.qty}</p>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="changeQty(${idx}, -1)" class="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200">-</button>
-            <span class="text-sm font-semibold text-gray-900 dark:text-white">${i.qty}</span>
-            <button onclick="changeQty(${idx}, 1)" class="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200">+</button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200">-</button>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white w-5 text-center">${i.qty}</span>
+            <button onclick="changeQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200">+</button>
           </div>
         </div>
       `).join("") : `<p class="text-sm text-gray-400 text-center py-8">Your cart is empty.</p>`;
@@ -669,6 +711,7 @@
       const showAdmin = typeof forceAdmin === "boolean" ? forceAdmin : document.getElementById("adminView").classList.contains("hidden");
       document.getElementById("storefrontView").classList.toggle("hidden", showAdmin);
       document.getElementById("adminView").classList.toggle("hidden", !showAdmin);
+      updateCartUI();
     }
 
     function switchAdminTab(tab) {
@@ -676,8 +719,8 @@
       document.getElementById("adminOrdersTab").classList.toggle("hidden", tab !== "orders");
       document.getElementById("adminSettingsTab").classList.toggle("hidden", tab !== "settings");
 
-      const activeClass = "pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 whitespace-nowrap";
-      const inactiveClass = "pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap";
+      const activeClass = "pb-3 text-xs sm:text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 whitespace-nowrap";
+      const inactiveClass = "pb-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap";
 
       document.getElementById("tabProductsBtn").className = tab === "products" ? activeClass : inactiveClass;
       document.getElementById("tabOrdersBtn").className = (tab === "orders" ? activeClass : inactiveClass) + " flex items-center gap-1.5";
@@ -685,6 +728,31 @@
     }
 
     function renderAdminTable() {
+      // Mobile cards
+      document.getElementById("adminProductMobileList").innerHTML = products.map(p => {
+        const stock = getStockCount(p);
+        const stockBadge = stock === 0
+          ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 font-semibold">0 (Sold Out)</span>`
+          : (stock <= 5
+            ? `<span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-semibold">${stock} left</span>`
+            : `<span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-semibold">${stock} in stock</span>`);
+
+        return `
+        <div class="bg-white dark:bg-gray-900 rounded-2xl p-3.5 border border-gray-100 dark:border-gray-800 flex items-center gap-3">
+          <img src="${p.image || 'https://placehold.co/100'}" class="w-14 h-14 rounded-xl object-cover shrink-0" />
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-sm text-gray-900 dark:text-white truncate">${p.name}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${p.category} • <strong class="text-gray-900 dark:text-white">${p.price} ${storeSettings.currency}</strong></p>
+            <div class="mt-1">${stockBadge}</div>
+          </div>
+          <div class="flex flex-col gap-1.5 shrink-0">
+            <button onclick="openProductModal('${p.id}')" class="bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium">Edit</button>
+            <button onclick="deleteProduct('${p.id}')" class="bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium">Delete</button>
+          </div>
+        </div>
+      `}).join("");
+
+      // Desktop table
       document.getElementById("adminProductTable").innerHTML = products.map(p => {
         const stock = getStockCount(p);
         const stockBadge = stock === 0
@@ -726,10 +794,10 @@
         const itemsHtml = (o.items || []).map(i => `<li class="text-xs text-gray-600 dark:text-gray-300">• <strong>${i.qty}×</strong> ${i.name} (${i.price * i.qty} ${o.currency || storeSettings.currency})</li>`).join("");
 
         return `
-        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           <div class="space-y-1.5">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-bold text-gray-900 dark:text-white text-base">${o.customerName}</span>
+              <span class="font-bold text-gray-900 dark:text-white text-sm sm:text-base">${o.customerName}</span>
               <span class="text-xs text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md"><i class="fa-solid fa-phone mr-1"></i>${o.customerPhone || 'Via WhatsApp'}</span>
               <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold ${isConfirmed ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300'}">${o.status || 'Pending'}</span>
             </div>
@@ -737,12 +805,12 @@
             <ul class="pt-1 space-y-0.5">${itemsHtml}</ul>
           </div>
 
-          <div class="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between gap-3 border-t md:border-t-0 border-gray-100 dark:border-gray-800 pt-3 md:pt-0">
-            <span class="font-bold text-lg text-emerald-700 dark:text-emerald-400">${o.total} ${o.currency || storeSettings.currency}</span>
+          <div class="flex flex-row md:flex-col items-center md:items-end justify-between gap-3 border-t md:border-t-0 border-gray-100 dark:border-gray-800 pt-3 md:pt-0">
+            <span class="font-bold text-base sm:text-lg text-emerald-700 dark:text-emerald-400">${o.total} ${o.currency || storeSettings.currency}</span>
             <div class="flex items-center gap-2">
               ${!isConfirmed ? `
                 <button onclick="confirmOrder('${o.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                  <i class="fa-solid fa-check mr-1"></i> Confirm & Deduct Stock
+                  <i class="fa-solid fa-check mr-1"></i> Confirm
                 </button>
               ` : ""}
               <button onclick="deleteOrder('${o.id}')" class="bg-red-50 dark:bg-red-950/60 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium transition">
