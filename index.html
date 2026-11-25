@@ -155,6 +155,40 @@
     </div>
   </footer>
 
+  <!-- PRODUCT IMAGE ZOOM / QUICK VIEW MODAL -->
+  <div id="imageZoomModal" onclick="if(event.target === this) closeImageZoom()" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b">
+        <div class="flex items-center gap-2">
+          <span id="zoomCategory" class="text-xs font-semibold text-emerald-600 uppercase tracking-wide"></span>
+          <span id="zoomStockBadge" class="text-xs px-2 py-0.5 rounded-full font-medium"></span>
+        </div>
+        <button onclick="closeImageZoom()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 text-xl">&times;</button>
+      </div>
+
+      <div class="bg-gray-100 relative flex items-center justify-center overflow-auto max-h-[55vh] p-2">
+        <img id="zoomImage" onclick="toggleZoomScale()" src="" alt="Product Preview" class="max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in" />
+        <button onclick="toggleZoomScale()" class="absolute bottom-3 right-3 bg-black/65 hover:bg-black/80 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow">
+          <i id="zoomIcon" class="fa-solid fa-magnifying-glass-plus"></i>
+          <span id="zoomLabel">Zoom In</span>
+        </button>
+      </div>
+
+      <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t bg-white">
+        <div class="space-y-1 flex-1">
+          <h3 id="zoomTitle" class="font-bold text-xl text-gray-900"></h3>
+          <p id="zoomDesc" class="text-sm text-gray-500 leading-relaxed"></p>
+        </div>
+        <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0">
+          <span id="zoomPrice" class="font-bold text-xl text-gray-900"></span>
+          <button id="zoomAddBtn" class="px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- CART DRAWER MODAL -->
   <div id="cartModal" class="hidden fixed inset-0 bg-black/50 z-50 flex justify-end">
     <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
@@ -290,6 +324,7 @@
     let products = [];
     let orders = [];
     let cart = [];
+    let isZoomedIn = false;
 
     function getStockCount(p) {
       if (typeof p.stockQty === "number") return p.stockQty;
@@ -369,14 +404,19 @@
         const badgeStyle = !available ? "bg-red-50 text-red-600" : (stock <= 5 ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700");
 
         return `
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-          <img src="${p.image || 'https://placehold.co/600x400?text=Product'}" class="h-52 w-full object-cover bg-gray-100" />
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group">
+          <div onclick="openImageZoom('${p.id}')" class="relative h-52 w-full bg-gray-100 overflow-hidden cursor-zoom-in">
+            <img src="${p.image || 'https://placehold.co/600x400?text=Product'}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            <span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full opacity-90 sm:opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+              <i class="fa-solid fa-expand"></i> View
+            </span>
+          </div>
           <div class="p-5 flex-1 flex flex-col">
             <div class="flex justify-between items-start gap-2 mb-1">
               <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">${p.category}</span>
               <span class="text-xs px-2 py-0.5 rounded-full font-medium ${badgeStyle}">${stockLabel}</span>
             </div>
-            <h3 class="font-bold text-gray-900 text-lg mb-1">${p.name}</h3>
+            <h3 onclick="openImageZoom('${p.id}')" class="font-bold text-gray-900 text-lg mb-1 cursor-pointer hover:text-emerald-700 transition">${p.name}</h3>
             <p class="text-gray-500 text-sm mb-4 flex-1">${p.description}</p>
             <div class="flex items-center justify-between pt-3 border-t border-gray-100">
               <span class="font-bold text-lg text-gray-900">${p.price} ${storeSettings.currency}</span>
@@ -388,6 +428,60 @@
         </div>
       `}).join("");
     }
+
+    function openImageZoom(id) {
+      const p = products.find(x => x.id === id);
+      if (!p) return;
+      const stock = getStockCount(p);
+      const available = stock > 0;
+      const stockLabel = !available ? "Sold Out" : (stock <= 5 ? `Only ${stock} left` : `In Stock (${stock})`);
+      const badgeStyle = !available ? "bg-red-50 text-red-600" : (stock <= 5 ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700");
+
+      isZoomedIn = false;
+      const imgEl = document.getElementById("zoomImage");
+      imgEl.src = p.image || "https://placehold.co/600x400?text=Product";
+      imgEl.style.transform = "scale(1)";
+      imgEl.className = "max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in";
+      document.getElementById("zoomIcon").className = "fa-solid fa-magnifying-glass-plus";
+      document.getElementById("zoomLabel").textContent = "Zoom In";
+
+      document.getElementById("zoomCategory").textContent = p.category;
+      const badgeEl = document.getElementById("zoomStockBadge");
+      badgeEl.textContent = stockLabel;
+      badgeEl.className = `text-xs px-2 py-0.5 rounded-full font-medium ${badgeStyle}`;
+
+      document.getElementById("zoomTitle").textContent = p.name;
+      document.getElementById("zoomDesc").textContent = p.description;
+      document.getElementById("zoomPrice").textContent = `${p.price} ${storeSettings.currency}`;
+
+      const addBtn = document.getElementById("zoomAddBtn");
+      addBtn.disabled = !available;
+      addBtn.className = `px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5 ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`;
+      addBtn.onclick = () => {
+        addToCart(p.id);
+        closeImageZoom();
+      };
+
+      document.getElementById("imageZoomModal").classList.remove("hidden");
+    }
+
+    function toggleZoomScale() {
+      isZoomedIn = !isZoomedIn;
+      const imgEl = document.getElementById("zoomImage");
+      imgEl.style.transform = isZoomedIn ? "scale(1.75)" : "scale(1)";
+      imgEl.style.transformOrigin = "center center";
+      imgEl.className = `max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 ${isZoomedIn ? 'cursor-zoom-out' : 'cursor-zoom-in'}`;
+      document.getElementById("zoomIcon").className = isZoomedIn ? "fa-solid fa-magnifying-glass-minus" : "fa-solid fa-magnifying-glass-plus";
+      document.getElementById("zoomLabel").textContent = isZoomedIn ? "Reset Zoom" : "Zoom In";
+    }
+
+    function closeImageZoom() {
+      document.getElementById("imageZoomModal").classList.add("hidden");
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeImageZoom();
+    });
 
     function addToCart(id) {
       const item = products.find(p => p.id === id);
@@ -461,7 +555,6 @@
         createdAt: Date.now()
       };
 
-      // Save Pre-Order to Firebase or LocalStorage
       try {
         if (useCloud) {
           await db.collection("orders").add(orderRecord);
@@ -475,7 +568,7 @@
       }
 
       const lines = cart.map(i => {
-        const imgLine = (i.image && i.image.startsWith("http")) ? `\n  Photo: ${i.image}` : "";
+        const imgLine = (i.image && i.image.startsWith("http")) ? `\n${i.image}` : "";
         return `• ${i.name} (x${i.qty}) - ${i.price * i.qty} ${storeSettings.currency}${imgLine}`;
       }).join("\n\n");
 
