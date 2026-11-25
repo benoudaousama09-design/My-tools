@@ -5,27 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mytool — WhatsApp Catalog</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    if (
+      localStorage.getItem("theme") === "dark" ||
+      (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
+      document.documentElement.classList.add("dark");
+    }
+  </script>
 </head>
-<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Top Store Header -->
-  <header class="bg-white shadow-sm sticky top-0 z-30">
+  <header class="bg-white dark:bg-gray-900 shadow-sm dark:shadow-gray-950/50 border-b border-transparent dark:border-gray-800 sticky top-0 z-30 transition-colors">
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow">
           <i class="fa-solid fa-bag-shopping"></i>
         </div>
         <div>
-          <h1 id="headerStoreName" class="font-bold text-xl text-gray-900 leading-tight">Mytool</h1>
-          <p class="text-xs text-emerald-600 font-medium flex items-center gap-1">
+          <h1 id="headerStoreName" class="font-bold text-xl text-gray-900 dark:text-white leading-tight">Mytool</h1>
+          <p class="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
             <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Ready to Order via WhatsApp
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <button id="adminBarBtn" onclick="toggleAdminView()" class="hidden text-sm bg-gray-900 text-white px-3.5 py-2 rounded-lg hover:bg-gray-800 transition">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button id="themeToggleBtn" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-amber-400 flex items-center justify-center text-sm transition">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </button>
+        <button id="adminBarBtn" onclick="toggleAdminView()" class="hidden text-sm bg-gray-900 dark:bg-gray-800 text-white px-3.5 py-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-700 border border-transparent dark:border-gray-700 transition">
           <i class="fa-solid fa-sliders mr-1"></i> Dashboard
         </button>
         <button onclick="openCart()" class="relative bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 shadow-sm transition">
@@ -39,7 +55,7 @@
 
   <!-- PUBLIC STOREFRONT VIEW -->
   <main id="storefrontView" class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
-    <div class="bg-gradient-to-r from-emerald-700 to-teal-600 rounded-2xl p-6 md:p-10 text-white mb-8 shadow-md">
+    <div class="bg-gradient-to-r from-emerald-700 to-teal-600 dark:from-emerald-900 dark:to-teal-800 rounded-2xl p-6 md:p-10 text-white mb-8 shadow-md">
       <h2 id="heroStoreTitle" class="text-2xl md:text-4xl font-bold mb-2">Welcome to Mytool</h2>
       <p id="heroTagline" class="text-emerald-100 text-sm md:text-base max-w-xl">Select your favorite tools and equipment, customize your quantities, and send your order directly to us on WhatsApp.</p>
     </div>
@@ -48,9 +64,9 @@
     <div class="flex flex-col sm:flex-row gap-3 mb-6">
       <div class="relative flex-1">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400"></i>
-        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search tools & products..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search tools & products..." class="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
       </div>
-      <select id="categoryFilter" onchange="renderProducts()" class="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+      <select id="categoryFilter" onchange="renderProducts()" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500">
         <option value="ALL">All Categories</option>
       </select>
     </div>
@@ -64,40 +80,40 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <div class="flex items-center gap-2">
-          <h2 class="text-2xl font-bold text-gray-900">Store Control Panel</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Store Control Panel</h2>
           <span id="syncStatusBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Local Mode</span>
         </div>
-        <p class="text-sm text-gray-500">Manage inventory stock counts, customer pre-orders, and WhatsApp order settings.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Manage inventory stock counts, customer pre-orders, and WhatsApp order settings.</p>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="openProductModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">
           <i class="fa-solid fa-plus mr-1"></i> Add New Product
         </button>
-        <button onclick="logoutAdmin()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3.5 py-2.5 rounded-xl text-sm font-medium">
+        <button onclick="logoutAdmin()" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3.5 py-2.5 rounded-xl text-sm font-medium">
           Logout
         </button>
       </div>
     </div>
 
     <!-- Admin Tabs -->
-    <div class="flex gap-6 border-b border-gray-200 mb-6 overflow-x-auto">
-      <button id="tabProductsBtn" onclick="switchAdminTab('products')" class="pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 whitespace-nowrap">
+    <div class="flex gap-6 border-b border-gray-200 dark:border-gray-800 mb-6 overflow-x-auto">
+      <button id="tabProductsBtn" onclick="switchAdminTab('products')" class="pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
         Products & Stock
       </button>
-      <button id="tabOrdersBtn" onclick="switchAdminTab('orders')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap flex items-center gap-1.5">
+      <button id="tabOrdersBtn" onclick="switchAdminTab('orders')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap flex items-center gap-1.5">
         <span>Pre-Orders</span>
-        <span id="pendingOrdersBadge" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+        <span id="pendingOrdersBadge" class="bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
       </button>
-      <button id="tabSettingsBtn" onclick="switchAdminTab('settings')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap">
+      <button id="tabSettingsBtn" onclick="switchAdminTab('settings')" class="pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap">
         Store & WhatsApp Settings
       </button>
     </div>
 
     <!-- TAB 1: Admin Products & Stock List -->
-    <div id="adminProductsTab" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div id="adminProductsTab" class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
-          <thead class="bg-gray-50 text-xs uppercase text-gray-500 border-b">
+          <thead class="bg-gray-50 dark:bg-gray-800/60 text-xs uppercase text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-800">
             <tr>
               <th class="py-3.5 px-4">Product</th>
               <th class="py-3.5 px-4">Category</th>
@@ -106,7 +122,7 @@
               <th class="py-3.5 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody id="adminProductTable" class="divide-y divide-gray-100 text-sm"></tbody>
+          <tbody id="adminProductTable" class="divide-y divide-gray-100 dark:divide-gray-800 text-sm"></tbody>
         </table>
       </div>
     </div>
@@ -117,25 +133,25 @@
     </div>
 
     <!-- TAB 3: Admin Store Settings Form -->
-    <div id="adminSettingsTab" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-2xl">
+    <div id="adminSettingsTab" class="hidden bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 max-w-2xl">
       <form onsubmit="saveStoreSettings(event)" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
-          <input id="settingStoreName" type="text" required class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm" />
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Store Name</label>
+          <input id="settingStoreName" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Hero Tagline</label>
-          <input id="settingTagline" type="text" required class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm" />
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hero Tagline</label>
+          <input id="settingTagline" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (with country code)</label>
-            <input id="settingWhatsapp" type="text" placeholder="e.g. 212612345678" required class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">WhatsApp Number (with country code)</label>
+            <input id="settingWhatsapp" type="text" placeholder="e.g. 212612345678" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
             <p class="text-xs text-gray-400 mt-1">Digits only, no + or spaces (e.g., 212600000000).</p>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Currency Symbol</label>
-            <input id="settingCurrency" type="text" placeholder="MAD, $, €" required class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm" />
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency Symbol</label>
+            <input id="settingCurrency" type="text" placeholder="MAD, $, €" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
           </div>
         </div>
         <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium">
@@ -146,7 +162,7 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-gray-400 py-6 mt-12">
+  <footer class="bg-gray-900 dark:bg-black text-gray-400 py-6 mt-12 border-t border-transparent dark:border-gray-800">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
       <p id="footerCopy">© 2026 Mytool. All rights reserved.</p>
       <button onclick="openLoginModal()" class="text-gray-400 hover:text-white flex items-center gap-1.5 transition">
@@ -157,30 +173,30 @@
 
   <!-- PRODUCT IMAGE ZOOM / QUICK VIEW MODAL -->
   <div id="imageZoomModal" onclick="if(event.target === this) closeImageZoom()" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-      <div class="flex items-center justify-between px-5 py-3.5 border-b">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl border border-transparent dark:border-gray-800 flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-800">
         <div class="flex items-center gap-2">
-          <span id="zoomCategory" class="text-xs font-semibold text-emerald-600 uppercase tracking-wide"></span>
+          <span id="zoomCategory" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide"></span>
           <span id="zoomStockBadge" class="text-xs px-2 py-0.5 rounded-full font-medium"></span>
         </div>
-        <button onclick="closeImageZoom()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-900 text-xl">&times;</button>
+        <button onclick="closeImageZoom()" class="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-xl">&times;</button>
       </div>
 
-      <div class="bg-gray-100 relative flex items-center justify-center overflow-auto max-h-[55vh] p-2">
+      <div class="bg-gray-100 dark:bg-gray-950 relative flex items-center justify-center overflow-auto max-h-[55vh] p-2">
         <img id="zoomImage" onclick="toggleZoomScale()" src="" alt="Product Preview" class="max-h-[52vh] w-auto object-contain rounded-lg transition-transform duration-200 cursor-zoom-in" />
-        <button onclick="toggleZoomScale()" class="absolute bottom-3 right-3 bg-black/65 hover:bg-black/80 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow">
+        <button onclick="toggleZoomScale()" class="absolute bottom-3 right-3 bg-black/70 hover:bg-black/85 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow">
           <i id="zoomIcon" class="fa-solid fa-magnifying-glass-plus"></i>
           <span id="zoomLabel">Zoom In</span>
         </button>
       </div>
 
-      <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t bg-white">
+      <div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div class="space-y-1 flex-1">
-          <h3 id="zoomTitle" class="font-bold text-xl text-gray-900"></h3>
-          <p id="zoomDesc" class="text-sm text-gray-500 leading-relaxed"></p>
+          <h3 id="zoomTitle" class="font-bold text-xl text-gray-900 dark:text-white"></h3>
+          <p id="zoomDesc" class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed"></p>
         </div>
-        <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0">
-          <span id="zoomPrice" class="font-bold text-xl text-gray-900"></span>
+        <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-200 dark:border-gray-800">
+          <span id="zoomPrice" class="font-bold text-xl text-gray-900 dark:text-white"></span>
           <button id="zoomAddBtn" class="px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5">
             <i class="fa-solid fa-plus"></i> Add to Cart
           </button>
@@ -190,18 +206,18 @@
   </div>
 
   <!-- CART DRAWER MODAL -->
-  <div id="cartModal" class="hidden fixed inset-0 bg-black/50 z-50 flex justify-end">
-    <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
-      <div class="p-4 border-b flex items-center justify-between">
-        <h3 class="font-bold text-lg">Your Order Cart</h3>
-        <button onclick="closeCart()" class="text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+  <div id="cartModal" class="hidden fixed inset-0 bg-black/60 z-50 flex justify-end">
+    <div class="bg-white dark:bg-gray-900 w-full max-w-md h-full flex flex-col shadow-2xl border-l border-transparent dark:border-gray-800">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+        <h3 class="font-bold text-lg text-gray-900 dark:text-white">Your Order Cart</h3>
+        <button onclick="closeCart()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white text-xl">&times;</button>
       </div>
       <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-      <div class="p-4 border-t bg-gray-50 space-y-3">
-        <input id="customerName" type="text" placeholder="Your Full Name *" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm bg-white" />
-        <input id="customerPhone" type="tel" placeholder="Your Phone Number (Optional)" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm bg-white" />
-        <input id="customerAddress" type="text" placeholder="Delivery City / Address *" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm bg-white" />
-        <div class="flex justify-between font-bold text-base pt-1">
+      <div class="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/60 space-y-3">
+        <input id="customerName" type="text" placeholder="Your Full Name *" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
+        <input id="customerPhone" type="tel" placeholder="Your Phone Number (Optional)" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
+        <input id="customerAddress" type="text" placeholder="Delivery City / Address *" class="w-full border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400" />
+        <div class="flex justify-between font-bold text-base pt-1 text-gray-900 dark:text-white">
           <span>Total</span>
           <span id="cartTotal">0 MAD</span>
         </div>
@@ -213,52 +229,52 @@
   </div>
 
   <!-- ADD / EDIT PRODUCT MODAL -->
-  <div id="productModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+  <div id="productModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg p-6 shadow-xl border border-transparent dark:border-gray-800 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="productModalTitle" class="font-bold text-lg">Add New Product</h3>
-        <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+        <h3 id="productModalTitle" class="font-bold text-lg text-gray-900 dark:text-white">Add New Product</h3>
+        <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white text-xl">&times;</button>
       </div>
       <form onsubmit="saveProduct(event)" class="space-y-4">
         <input type="hidden" id="editProductId" />
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Product Name *</label>
-            <input id="prodName" type="text" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Product Name *</label>
+            <input id="prodName" type="text" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Price *</label>
-            <input id="prodPrice" type="number" step="0.01" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Price *</label>
+            <input id="prodPrice" type="number" step="0.01" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Category *</label>
-            <input id="prodCategory" type="text" required placeholder="e.g. Power Tools" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Category *</label>
+            <input id="prodCategory" type="text" required placeholder="e.g. Power Tools" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-gray-600 mb-1">Amount in Stock *</label>
-            <input id="prodStockQty" type="number" min="0" step="1" required placeholder="e.g. 15" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm" />
+            <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Amount in Stock *</label>
+            <input id="prodStockQty" type="number" min="0" step="1" required placeholder="e.g. 15" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
             <p class="text-[11px] text-gray-400 mt-0.5">Set to 0 to mark as Sold Out.</p>
           </div>
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Product Image (Paste URL or Upload Photo)</label>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Product Image (Paste URL or Upload Photo)</label>
           <div class="flex gap-2">
-            <input id="prodImage" type="text" placeholder="https://... or upload photo" class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-sm" />
-            <label class="cursor-pointer bg-gray-100 hover:bg-gray-200 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 border border-gray-300">
+            <input id="prodImage" type="text" placeholder="https://... or upload photo" class="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white" />
+            <label class="cursor-pointer bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center gap-1.5 border border-gray-300 dark:border-gray-700">
               <i class="fa-solid fa-upload"></i> Upload
               <input type="file" accept="image/*" onchange="handleImageUpload(event)" class="hidden" />
             </label>
           </div>
-          <img id="imagePreview" class="hidden mt-2 h-24 w-24 object-cover rounded-xl border" />
+          <img id="imagePreview" class="hidden mt-2 h-24 w-24 object-cover rounded-xl border dark:border-gray-700" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Description *</label>
-          <textarea id="prodDesc" rows="3" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm"></textarea>
+          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Description *</label>
+          <textarea id="prodDesc" rows="3" required class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white"></textarea>
         </div>
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-xl text-sm text-gray-600 hover:bg-gray-100">Cancel</button>
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">Cancel</button>
           <button type="submit" id="saveProdBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-medium">Save Product</button>
         </div>
       </form>
@@ -266,26 +282,26 @@
   </div>
 
   <!-- ADMIN LOGIN MODAL -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl">
+  <div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-sm p-6 shadow-xl border border-transparent dark:border-gray-800">
       <div class="flex justify-between items-center mb-3">
-        <h3 class="font-bold text-lg">Admin Sign In</h3>
-        <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-700 text-xl">&times;</button>
+        <h3 class="font-bold text-lg text-gray-900 dark:text-white">Admin Sign In</h3>
+        <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-700 dark:hover:text-white text-xl">&times;</button>
       </div>
       <div class="mb-4">
         <span id="loginModeBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">Local Mode</span>
       </div>
       <form onsubmit="handleAdminLogin(event)" class="space-y-3">
         <div id="emailFieldWrap" class="hidden">
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Admin Email</label>
-          <input id="adminEmail" type="email" placeholder="admin@store.com" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm" />
+          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Admin Email</label>
+          <input id="adminEmail" type="email" placeholder="admin@store.com" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-600 mb-1">Password</label>
-          <input id="adminPassword" type="password" required placeholder="••••••••" class="w-full border border-gray-300 rounded-xl px-3.5 py-2 text-sm" />
+          <label class="block text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Password</label>
+          <input id="adminPassword" type="password" required placeholder="••••••••" class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3.5 py-2 text-sm text-gray-900 dark:text-white" />
         </div>
-        <p id="loginError" class="hidden text-xs text-red-600 font-medium"></p>
-        <button type="submit" class="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-xl text-sm font-medium">
+        <p id="loginError" class="hidden text-xs text-red-500 font-medium"></p>
+        <button type="submit" class="w-full bg-gray-900 dark:bg-emerald-600 hover:bg-gray-800 dark:hover:bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-medium transition">
           Access Dashboard
         </button>
       </form>
@@ -298,6 +314,22 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
+    function updateThemeIcon() {
+      const isDark = document.documentElement.classList.contains("dark");
+      const icon = document.getElementById("themeIcon");
+      if (icon) {
+        icon.className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      updateThemeIcon();
+    }
+
+    updateThemeIcon();
+
     const firebaseConfig = {
       apiKey: "AIzaSyBMGdfSTEnkWSRUV7O4GCYdepoRBDl22KI",
       authDomain: "my-tool-767f9.firebaseapp.com",
@@ -336,9 +368,9 @@
       db = firebase.firestore();
       auth = firebase.auth();
       document.getElementById("syncStatusBadge").textContent = "Cloud Sync Active";
-      document.getElementById("syncStatusBadge").className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800";
+      document.getElementById("syncStatusBadge").className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300";
       document.getElementById("loginModeBadge").textContent = "Cloud Sync Active";
-      document.getElementById("loginModeBadge").className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800";
+      document.getElementById("loginModeBadge").className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300";
       document.getElementById("emailFieldWrap").classList.remove("hidden");
 
       auth.onAuthStateChanged(user => {
@@ -401,26 +433,30 @@
         const stock = getStockCount(p);
         const available = stock > 0;
         const stockLabel = !available ? "Sold Out" : (stock <= 5 ? `Only ${stock} left` : `In Stock (${stock})`);
-        const badgeStyle = !available ? "bg-red-50 text-red-600" : (stock <= 5 ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700");
+        const badgeStyle = !available
+          ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+          : (stock <= 5
+            ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+            : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400");
 
         return `
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col group">
-          <div onclick="openImageZoom('${p.id}')" class="relative h-52 w-full bg-gray-100 overflow-hidden cursor-zoom-in">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col group transition-colors">
+          <div onclick="openImageZoom('${p.id}')" class="relative h-52 w-full bg-gray-100 dark:bg-gray-800 overflow-hidden cursor-zoom-in">
             <img src="${p.image || 'https://placehold.co/600x400?text=Product'}" class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
-            <span class="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full opacity-90 sm:opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
+            <span class="absolute bottom-2.5 right-2.5 bg-black/65 text-white text-xs px-2.5 py-1 rounded-full opacity-90 sm:opacity-0 group-hover:opacity-100 transition flex items-center gap-1">
               <i class="fa-solid fa-expand"></i> View
             </span>
           </div>
           <div class="p-5 flex-1 flex flex-col">
             <div class="flex justify-between items-start gap-2 mb-1">
-              <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">${p.category}</span>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">${p.category}</span>
               <span class="text-xs px-2 py-0.5 rounded-full font-medium ${badgeStyle}">${stockLabel}</span>
             </div>
-            <h3 onclick="openImageZoom('${p.id}')" class="font-bold text-gray-900 text-lg mb-1 cursor-pointer hover:text-emerald-700 transition">${p.name}</h3>
-            <p class="text-gray-500 text-sm mb-4 flex-1">${p.description}</p>
-            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-              <span class="font-bold text-lg text-gray-900">${p.price} ${storeSettings.currency}</span>
-              <button onclick="addToCart('${p.id}')" ${!available ? "disabled" : ""} class="px-4 py-2 rounded-xl text-sm font-medium transition ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}">
+            <h3 onclick="openImageZoom('${p.id}')" class="font-bold text-gray-900 dark:text-white text-lg mb-1 cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition">${p.name}</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-4 flex-1">${p.description}</p>
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+              <span class="font-bold text-lg text-gray-900 dark:text-white">${p.price} ${storeSettings.currency}</span>
+              <button onclick="addToCart('${p.id}')" ${!available ? "disabled" : ""} class="px-4 py-2 rounded-xl text-sm font-medium transition ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'}">
                 <i class="fa-solid fa-plus mr-1"></i> Add
               </button>
             </div>
@@ -435,7 +471,11 @@
       const stock = getStockCount(p);
       const available = stock > 0;
       const stockLabel = !available ? "Sold Out" : (stock <= 5 ? `Only ${stock} left` : `In Stock (${stock})`);
-      const badgeStyle = !available ? "bg-red-50 text-red-600" : (stock <= 5 ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700");
+      const badgeStyle = !available
+        ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400"
+        : (stock <= 5
+          ? "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400"
+          : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400");
 
       isZoomedIn = false;
       const imgEl = document.getElementById("zoomImage");
@@ -456,7 +496,7 @@
 
       const addBtn = document.getElementById("zoomAddBtn");
       addBtn.disabled = !available;
-      addBtn.className = `px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5 ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`;
+      addBtn.className = `px-5 py-2.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5 ${available ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'}`;
       addBtn.onclick = () => {
         addToCart(p.id);
         closeImageZoom();
@@ -506,15 +546,15 @@
       const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
       document.getElementById("cartTotal").textContent = `${total} ${storeSettings.currency}`;
       document.getElementById("cartItemsContainer").innerHTML = cart.length ? cart.map((i, idx) => `
-        <div class="flex items-center justify-between bg-gray-50 p-3 rounded-xl">
+        <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/70 p-3 rounded-xl">
           <div>
-            <p class="font-semibold text-sm">${i.name}</p>
-            <p class="text-xs text-gray-500">${i.price} ${storeSettings.currency} × ${i.qty}</p>
+            <p class="font-semibold text-sm text-gray-900 dark:text-white">${i.name}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">${i.price} ${storeSettings.currency} × ${i.qty}</p>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="changeQty(${idx}, -1)" class="w-7 h-7 rounded-lg bg-white border text-sm">-</button>
-            <span class="text-sm font-semibold">${i.qty}</span>
-            <button onclick="changeQty(${idx}, 1)" class="w-7 h-7 rounded-lg bg-white border text-sm">+</button>
+            <button onclick="changeQty(${idx}, -1)" class="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200">-</button>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white">${i.qty}</span>
+            <button onclick="changeQty(${idx}, 1)" class="w-7 h-7 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm text-gray-800 dark:text-gray-200">+</button>
           </div>
         </div>
       `).join("") : `<p class="text-sm text-gray-400 text-center py-8">Your cart is empty.</p>`;
@@ -636,8 +676,8 @@
       document.getElementById("adminOrdersTab").classList.toggle("hidden", tab !== "orders");
       document.getElementById("adminSettingsTab").classList.toggle("hidden", tab !== "settings");
 
-      const activeClass = "pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 whitespace-nowrap";
-      const inactiveClass = "pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 whitespace-nowrap";
+      const activeClass = "pb-3 text-sm font-semibold border-b-2 border-emerald-600 text-emerald-600 dark:text-emerald-400 whitespace-nowrap";
+      const inactiveClass = "pb-3 text-sm font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 whitespace-nowrap";
 
       document.getElementById("tabProductsBtn").className = tab === "products" ? activeClass : inactiveClass;
       document.getElementById("tabOrdersBtn").className = (tab === "orders" ? activeClass : inactiveClass) + " flex items-center gap-1.5";
@@ -648,23 +688,23 @@
       document.getElementById("adminProductTable").innerHTML = products.map(p => {
         const stock = getStockCount(p);
         const stockBadge = stock === 0
-          ? `<span class="text-xs px-2.5 py-1 rounded-full bg-red-50 text-red-600 font-semibold">0 (Sold Out)</span>`
+          ? `<span class="text-xs px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 font-semibold">0 (Sold Out)</span>`
           : (stock <= 5
-            ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold">${stock} units (Low)</span>`
-            : `<span class="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold">${stock} units</span>`);
+            ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-semibold">${stock} units (Low)</span>`
+            : `<span class="text-xs px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-semibold">${stock} units</span>`);
 
         return `
         <tr>
-          <td class="py-3 px-4 font-medium flex items-center gap-3">
+          <td class="py-3 px-4 font-medium text-gray-900 dark:text-white flex items-center gap-3">
             <img src="${p.image || 'https://placehold.co/100'}" class="w-10 h-10 rounded-lg object-cover" />
             <span>${p.name}</span>
           </td>
-          <td class="py-3 px-4 text-gray-500">${p.category}</td>
-          <td class="py-3 px-4 font-semibold">${p.price} ${storeSettings.currency}</td>
+          <td class="py-3 px-4 text-gray-500 dark:text-gray-400">${p.category}</td>
+          <td class="py-3 px-4 font-semibold text-gray-900 dark:text-white">${p.price} ${storeSettings.currency}</td>
           <td class="py-3 px-4">${stockBadge}</td>
           <td class="py-3 px-4 text-right space-x-2">
-            <button onclick="openProductModal('${p.id}')" class="text-blue-600 hover:underline text-xs font-medium">Edit</button>
-            <button onclick="deleteProduct('${p.id}')" class="text-red-600 hover:underline text-xs font-medium">Delete</button>
+            <button onclick="openProductModal('${p.id}')" class="text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium">Edit</button>
+            <button onclick="deleteProduct('${p.id}')" class="text-red-600 dark:text-red-400 hover:underline text-xs font-medium">Delete</button>
           </td>
         </tr>
       `}).join("");
@@ -676,36 +716,36 @@
 
       const container = document.getElementById("adminOrdersList");
       if (!orders.length) {
-        container.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-gray-400 text-sm border border-gray-100">No customer pre-orders recorded yet.</div>`;
+        container.innerHTML = `<div class="bg-white dark:bg-gray-900 rounded-2xl p-8 text-center text-gray-400 text-sm border border-gray-100 dark:border-gray-800">No customer pre-orders recorded yet.</div>`;
         return;
       }
 
       container.innerHTML = orders.map(o => {
         const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString() : "Recent";
         const isConfirmed = o.status === "Confirmed";
-        const itemsHtml = (o.items || []).map(i => `<li class="text-xs text-gray-600">• <strong>${i.qty}×</strong> ${i.name} (${i.price * i.qty} ${o.currency || storeSettings.currency})</li>`).join("");
+        const itemsHtml = (o.items || []).map(i => `<li class="text-xs text-gray-600 dark:text-gray-300">• <strong>${i.qty}×</strong> ${i.name} (${i.price * i.qty} ${o.currency || storeSettings.currency})</li>`).join("");
 
         return `
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div class="space-y-1.5">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-bold text-gray-900 text-base">${o.customerName}</span>
-              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md"><i class="fa-solid fa-phone mr-1"></i>${o.customerPhone || 'Via WhatsApp'}</span>
-              <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold ${isConfirmed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${o.status || 'Pending'}</span>
+              <span class="font-bold text-gray-900 dark:text-white text-base">${o.customerName}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md"><i class="fa-solid fa-phone mr-1"></i>${o.customerPhone || 'Via WhatsApp'}</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold ${isConfirmed ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300'}">${o.status || 'Pending'}</span>
             </div>
-            <p class="text-xs text-gray-500"><i class="fa-solid fa-location-dot mr-1"></i>${o.customerAddress} &bull; <span class="text-gray-400">${dateStr}</span></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400"><i class="fa-solid fa-location-dot mr-1"></i>${o.customerAddress} &bull; <span class="text-gray-400">${dateStr}</span></p>
             <ul class="pt-1 space-y-0.5">${itemsHtml}</ul>
           </div>
 
-          <div class="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between gap-3 border-t md:border-t-0 pt-3 md:pt-0">
-            <span class="font-bold text-lg text-emerald-700">${o.total} ${o.currency || storeSettings.currency}</span>
+          <div class="flex flex-col sm:flex-row md:flex-col items-start sm:items-center md:items-end justify-between gap-3 border-t md:border-t-0 border-gray-100 dark:border-gray-800 pt-3 md:pt-0">
+            <span class="font-bold text-lg text-emerald-700 dark:text-emerald-400">${o.total} ${o.currency || storeSettings.currency}</span>
             <div class="flex items-center gap-2">
               ${!isConfirmed ? `
                 <button onclick="confirmOrder('${o.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
                   <i class="fa-solid fa-check mr-1"></i> Confirm & Deduct Stock
                 </button>
               ` : ""}
-              <button onclick="deleteOrder('${o.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+              <button onclick="deleteOrder('${o.id}')" class="bg-red-50 dark:bg-red-950/60 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-lg text-xs font-medium transition">
                 Delete
               </button>
             </div>
