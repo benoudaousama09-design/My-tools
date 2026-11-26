@@ -656,7 +656,8 @@
 
       const phoneLine = phone ? `\n*Phone:* ${phone}` : "";
       const msg = `Hello *${storeSettings.storeName}*, I would like to place an order:\n\n${lines}\n\n*Total:* ${total} ${storeSettings.currency}\n*Name:* ${name}${phoneLine}\n*Address:* ${addr}`;
-      window.open(`https://wa.me/${storeSettings.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
+      const waUrl = `https://wa.me/${storeSettings.whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`;
+      window.location.href = waUrl;
     }
 
     function openLoginModal() {
