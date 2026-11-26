@@ -147,6 +147,14 @@
 
     <!-- TAB 2: Admin Pre-Orders List -->
     <div id="adminOrdersTab" class="hidden space-y-3 sm:space-y-4">
+      <div id="unconfirmedActionsBar" class="hidden flex items-center justify-between bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-2xl px-4 py-3">
+        <span class="text-xs sm:text-sm font-medium text-amber-800 dark:text-amber-300">
+          <i class="fa-solid fa-clock mr-1.5"></i> <span id="unconfirmedCountLabel">0</span> unconfirmed order(s)
+        </span>
+        <button id="clearUnconfirmedBtn" onclick="deleteAllUnconfirmed()" class="bg-red-600 hover:bg-red-700 active:scale-95 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+          <i class="fa-solid fa-trash-can"></i> Clear Unconfirmed
+        </button>
+      </div>
       <div id="adminOrdersList" class="grid grid-cols-1 gap-3 sm:gap-4"></div>
     </div>
 
@@ -780,8 +788,17 @@
     }
 
     function renderOrdersList() {
-      const pendingCount = orders.filter(o => o.status === "Pending").length;
+      const pendingOrders = orders.filter(o => o.status !== "Confirmed");
+      const pendingCount = pendingOrders.length;
       document.getElementById("pendingOrdersBadge").textContent = pendingCount;
+
+      const unconfirmedBar = document.getElementById("unconfirmedActionsBar");
+      if (pendingCount > 0) {
+        unconfirmedBar.classList.remove("hidden");
+        document.getElementById("unconfirmedCountLabel").textContent = pendingCount;
+      } else {
+        unconfirmedBar.classList.add("hidden");
+      }
 
       const container = document.getElementById("adminOrdersList");
       if (!orders.length) {
@@ -859,12 +876,48 @@
     }
 
     async function deleteOrder(orderId) {
-      if (!confirm("Remove this pre-order from the list?")) return;
-      if (useCloud) await db.collection("orders").doc(orderId).delete();
-      else {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      // Only ask for confirmation if the order was already confirmed; delete unconfirmed orders immediately
+      if (order.status === "Confirmed" && !confirm("This order is already confirmed. Remove it from your records?")) return;
+
+      if (useCloud) {
+        await db.collection("orders").doc(orderId).delete();
+      } else {
         orders = orders.filter(o => o.id !== orderId);
         localStorage.setItem("wa_store_orders", JSON.stringify(orders));
         renderOrdersList();
+      }
+    }
+
+    async function deleteAllUnconfirmed() {
+      const pending = orders.filter(o => o.status !== "Confirmed");
+      if (!pending.length) return;
+      if (!confirm(`Delete all ${pending.length} unconfirmed order(s)? Confirmed orders will be kept.`)) return;
+
+      const btn = document.getElementById("clearUnconfirmedBtn");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Clearing...`;
+      }
+
+      try {
+        if (useCloud) {
+          const batch = db.batch();
+          pending.forEach(o => batch.delete(db.collection("orders").doc(o.id)));
+          await batch.commit();
+        } else {
+          orders = orders.filter(o => o.status === "Confirmed");
+          localStorage.setItem("wa_store_orders", JSON.stringify(orders));
+          renderOrdersList();
+        }
+      } catch (err) {
+        alert("Could not clear unconfirmed orders: " + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Clear Unconfirmed`;
+        }
       }
     }
 
